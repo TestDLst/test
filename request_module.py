@@ -3,7 +3,7 @@ from collections import namedtuple
 
 class RequestAnalyzer:
     # TODO: отмечать параметры запросах REST стиля
-    def __init__(self, request='', injection_mark='FUZZ'):
+    def __init__(self, request='', injection_mark='%{ }%'):
         """Создает экзепляр класса RequestAnalyzer
 
         :param request: строка, содержащая сырой валидный запрос к серверу (например запросы из burpsuite)
@@ -53,10 +53,10 @@ class RequestObject:
         self.headers = {header.split(': ')[0]: header.split(': ')[1] for header in self.headers}
 
         # Переносим Host в переменную объекта для дальнейшего удобства сборки размеченного объекта
-        self.host = {'Host': self.headers.pop('Host')}
+        self.host = self.headers.pop('Host')
 
         # Пакуем кукисы
-        self.cookies = self.headers.get('Cookie')
+        self.cookies = self.headers.pop('Cookie')
         if self.cookies:
             self.cookies = {attribute.split('=')[0]: attribute.split('=')[1] for attribute in self.cookies.split('; ')}
 
@@ -70,6 +70,8 @@ class RequestObject:
                                             self.content_type.attributes}
 
         # Выделяем content_length для удобства сборки размченного объекта
+
+
 
 if __name__ == '__main__':
     with open('request.txt') as f:
