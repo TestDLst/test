@@ -4,20 +4,19 @@ from collections import namedtuple
 
 class RequestAnalyzer:
     # TODO: отмечать параметры запросах REST стиля
-    def __init__(self, request='', injection_mark='${ }'):
+    def __init__(self, request, injection_mark='${ }'):
         """Создает экзепляр класса RequestAnalyzer
 
         :param request: строка, содержащая сырой валидный запрос к серверу (например запросы из burpsuite)
         :param injection_mark: символы, разделенные пробелом, помечающие точки инъекции
         """
-        self.raw_request = request
         self.injection_mark = injection_mark
 
         self.included_headers = {'Accept-Language', 'Authorization', 'User-Agent', 'Content-Type', 'Referer', 'Cookie'}
         # Если можно будет указывать, какие параметры пропускать
         self.excluded_headers = {'Host'}
 
-        self.request_object = RequestObject(self.raw_request)
+        self.request_object = RequestObject(request)
 
         self._mark_request()
 
@@ -37,9 +36,8 @@ class RequestAnalyzer:
         """Помечает значения в строке запроса"""
         method, uri, http_ver = self.request_object.query_string.split(' ')
 
-        params = re.findall('=([^&]+)', uri)
-        for param in params:
-            uri = uri.replace(param, self.injection_mark.replace(' ', param))
+        uri = self._mark_by_regexp(uri, '=([^&]+)')
+        uri = self._mark_empty_params(uri)
 
         self.request_object.query_string = ' '.join([method, uri, http_ver])
 
@@ -51,13 +49,11 @@ class RequestAnalyzer:
         for header in self.request_object.headers:
             name, value = header.split(': ')
             if name in interesting_headers:
-                'Эвристика'
+                # Эвристика
                 if (' ' not in value) or (';' not in value and '=' not in value) or (';' in value and not '=' in value):
                     value = self.injection_mark.replace(' ', value)
                 else:
-                    params = re.findall('=([\S]+);?', value)
-                    for param in params:
-                        value = value.replace(param, self.injection_mark.replace(' ', param))
+                    value = self._mark_by_regexp(value, '=([\S]+);?', prefix='=')
 
             modified_headers.append(': '.join([name, value]))
 
@@ -74,19 +70,26 @@ class RequestAnalyzer:
     def _mark_data_plain(self):
         """Помечаются данные вида param1=value1&param2=value2"""
         self.request_object.data = self._mark_by_regexp(self.request_object.data, '=([^&]+)')
+        self.request_object.data = self._mark_empty_params(self.request_object.data)
 
-    def _mark_by_regexp(self, string, regexp):
+    def _mark_by_regexp(self, string, regexp, prefix=''):
         """Помечает параметры в строке по regexp'у
 
         :param string: Строка, в которой помечаются параметры
         :param regexp: Регулярное выражение, по которому они ищутся
+        :param prefix: Префикс строки, на которую заменяется найденная группа
         :return: Измененная строка string
         """
-        # TODO: исправить: Kak_davno_Vy_rabotaete_v_universitete=${${${${${${${${${1}}}}}}}}}
-        params = re.findall(regexp, string)
-        for param in params:
-            string = string.replace(param, self.injection_mark.replace(' ', param))
+        string = re.sub(regexp, lambda x: prefix + self.injection_mark.replace(' ', x.group(1)), string)
         return string
+
+    def _mark_empty_params(self, string):
+        """Помечает пустые параметры
+
+        :param string: Строка, в которой пустые параметры ищутся
+        :return: Измененная строка string
+        """
+        return re.sub('=(&|$)', lambda x: '=' + self.injection_mark + ('&' if '&' in x.group() else ''), string)
 
 
 class RequestObject:
