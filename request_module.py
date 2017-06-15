@@ -12,7 +12,6 @@ class RequestAnalyzer:
         """
         self.injection_mark = injection_mark
 
-        self.included_headers = {'Accept-Language', 'Authorization', 'User-Agent', 'Content-Type', 'Referer', 'Cookie'}
         # Если можно будет указывать, какие параметры пропускать
         self.excluded_headers = {'Host'}
 
@@ -43,12 +42,11 @@ class RequestAnalyzer:
 
     def _mark_headers(self):
         """Помечает значения в хидерах"""
-        interesting_headers = self.included_headers - self.excluded_headers
         modified_headers = []
 
         for header in self.request_object.headers:
             name, value = header.split(': ')
-            if name in interesting_headers:
+            if name not in self.excluded_headers:
                 # Эвристика
                 if (' ' not in value) or (';' not in value and '=' not in value) or (';' in value and not '=' in value):
                     value = self.injection_mark.replace(' ', value)
