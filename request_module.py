@@ -3,7 +3,7 @@ import re
 
 class RequestAnalyzer:
     # TODO: отмечать параметры запросах REST стиля
-    def __init__(self, request, injection_mark='${ }', verbose=True):
+    def __init__(self, request, injection_mark='§ §', verbose=True):
         """Создает экзепляр класса RequestAnalyzer
 
         :param request: строка, содержащая сырой валидный запрос к серверу (например запросы из burpsuite)
