@@ -80,7 +80,7 @@ class RequestAnalyzer:
         elif content_type == 'json':
             self._mark_data_json()
         elif content_type == 'xml':
-            self._mark_data_json()
+            self._mark_data_xml()
         else:
             pass
 
