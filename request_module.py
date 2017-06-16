@@ -1,5 +1,4 @@
 import re
-from collections import namedtuple
 
 
 class RequestAnalyzer:
@@ -76,16 +75,25 @@ class RequestAnalyzer:
         """Помечает параметры в данных"""
         content_type = self.request_object.content_type
 
-        if content_type.type in ['text', 'application'] \
-                and content_type.subtype in ['x-www-form-urlencoded', 'html', 'plain']:
+        if content_type == 'plain':
             self._mark_data_plain()
-        elif content_type.type in [''] and content_type.subtype in ['']:
+        elif content_type == 'json':
+            self._mark_data_json()
+        elif content_type == 'xml':
+            self._mark_data_json()
+        else:
             pass
 
     def _mark_data_plain(self):
         """Помечаются данные вида param1=value1&param2=value2"""
         self.request_object.data = self._mark_by_regexp(self.request_object.data, '=([^&]+)', '=')
         self.request_object.data = self._mark_empty_params(self.request_object.data)
+
+    def _mark_data_json(self):
+        pass
+
+    def _mark_data_xml(self):
+        pass
 
     def _mark_by_regexp(self, string, regexp, prefix=''):
         """Помечает параметры в строке по regexp'у
@@ -114,8 +122,12 @@ class RequestObject:
 
         self.query_string = ''
         self.headers = ''
-        self.content_type = namedtuple('content_type', 'type, subtype')
+        self.content_type = 'plain'
         self.data = ''
+
+        self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
+                            'application': {'atom+xml': 'xml', 'json': 'json', 'soap+xml': 'xml', 'xhtml+xml': 'xml',
+                                            'xml-dtd': 'xml', 'xop+xml': 'xml', 'xml': 'xml'}}
 
         self._parse_request(self.raw_request)
 
@@ -127,22 +139,14 @@ class RequestObject:
         self.query_string, self.headers = self.headers.split('\n')[0], self.headers.split('\n')[1:]
 
         # Находим хидер Content-type и парсим оттуда type и subtype
-
-
-        # if _content_type:
-        #     self.content_type.type, self.content_type.subtype = _content_type.split(': ')[1].split('; ')[0].split('/')
-        # else:
-        #     self.content_type.type, self.content_type.subtype = 'text', 'plain'
+        self._identify_content_type()
 
     def _identify_content_type(self):
         content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
-        '[type,subtype] -> type'
-        {'text': {'cmd': '', 'css': '', 'html': 'plain', 'javascript': '', 'plain': 'plain', 'php': '', 'xml': 'xml'}}
-        {'application': {'atom+xml': 'xml', 'EDI-X12': '', 'EDIFACT': '', 'json': 'json', 'javascript': '',
-                         'octet-stream': '', 'ogg': '', 'pdf': '', 'postscript': '', 'soap+xml': 'xml', 'font-woff': '',
-                         'xhtml+xml': 'xml', 'xml-dtd': 'xml', 'xop+xml': 'xml', 'zip': '', 'gzip': '',
-                         'x-bittorrent': '', 'x-tex': '', 'xml': 'xml'}}
-        {'audio':dict()}
+
+        if content_type:
+            type, subtype = content_type.split('/')
+            self.content_type = self.known_types.get(type).get(subtype)
 
 
 if __name__ == '__main__':
