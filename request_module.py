@@ -1,4 +1,5 @@
 import re
+import json
 
 
 class RequestAnalyzer:
@@ -90,7 +91,10 @@ class RequestAnalyzer:
         self.request_object.data = self._mark_empty_params(self.request_object.data)
 
     def _mark_data_json(self):
-        pass
+        _regexp = '''[ \[]"?([^{}\]\[]+?)["',}]'''
+        #self.request_object.data = self._mark_by_regexp(self.request_object.data, _regexp)
+        #print(self.request_object.data)
+        print(re.findall(_regexp, self.request_object.data))
 
     def _mark_data_xml(self):
         pass
@@ -145,12 +149,12 @@ class RequestObject:
         content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
 
         if content_type:
-            type, subtype = content_type.split('/')
+            type, subtype = content_type.split(': ')[1].split('/')
             self.content_type = self.known_types.get(type).get(subtype)
 
 
 if __name__ == '__main__':
-    with open('request.txt') as f:
+    with open('request_json.txt') as f:
         request_string = f.read()
 
     ra = RequestAnalyzer(request_string)
