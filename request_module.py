@@ -4,16 +4,21 @@ from collections import namedtuple
 
 class RequestAnalyzer:
     # TODO: отмечать параметры запросах REST стиля
-    def __init__(self, request, injection_mark='${ }'):
+    def __init__(self, request, injection_mark='${ }', verbose=True):
         """Создает экзепляр класса RequestAnalyzer
 
         :param request: строка, содержащая сырой валидный запрос к серверу (например запросы из burpsuite)
         :param injection_mark: символы, разделенные пробелом, помечающие точки инъекции
         """
         self.injection_mark = injection_mark
+        self.verbose = verbose
 
-        # Если можно будет указывать, какие параметры пропускать
-        self.excluded_headers = {'Host'}
+        self.excluded_headers = {'Host'}  # Если можно будет указывать, какие параметры пропускать
+        self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
+        # Хидеры, которые будут добавлены в запрос, если их в нем нет
+        self.extra_headers = {
+            'User-Agent'
+        }
 
         self.request_object = RequestObject(request)
 
@@ -45,29 +50,41 @@ class RequestAnalyzer:
         modified_headers = []
 
         for header in self.request_object.headers:
-            name, value = header.split(': ')
-            if name not in self.excluded_headers:
-                # Эвристика
-                if (' ' not in value) or (';' not in value and '=' not in value) or (';' in value and not '=' in value):
-                    value = self.injection_mark.replace(' ', value)
-                else:
-                    value = self._mark_by_regexp(value, '=([\S]+);?', prefix='=')
+            try:
+                name, value = header.split(': ')
+                self.all_headers.add(name)
+
+                if name not in self.excluded_headers:
+                    # Эвристика
+                    if (' ' not in value) or (';' not in value and '=' not in value) \
+                            or (';' in value and '=' not in value):
+                        value = self.injection_mark.replace(' ', value)
+                    else:
+                        value = self._mark_by_regexp(value, '=([\S]+);?', prefix='=')
+
+            except ValueError as ve:
+                if self.verbose:
+                    print('Exception in _mark_headers. Message: {}'.format(ve))
 
             modified_headers.append(': '.join([name, value]))
 
         self.request_object.headers = modified_headers
 
+    # TODO: Парсить xml и json
+    # TODO: И ещё что-нибудь
     def _mark_data(self):
         """Помечает параметры в данных"""
-        if self.request_object.content_type.type in ['text', 'application'] \
-                and self.request_object.content_type.subtype in ['x-www-form-urlencoded', 'html', 'plain']:
+        content_type = self.request_object.content_type
+
+        if content_type.type in ['text', 'application'] \
+                and content_type.subtype in ['x-www-form-urlencoded', 'html', 'plain']:
             self._mark_data_plain()
-        elif self.request_object.content_type.type in [''] and self.request_object.content_type.subtype in ['']:
+        elif content_type.type in [''] and content_type.subtype in ['']:
             pass
 
     def _mark_data_plain(self):
         """Помечаются данные вида param1=value1&param2=value2"""
-        self.request_object.data = self._mark_by_regexp(self.request_object.data, '=([^&]+)')
+        self.request_object.data = self._mark_by_regexp(self.request_object.data, '=([^&]+)', '=')
         self.request_object.data = self._mark_empty_params(self.request_object.data)
 
     def _mark_by_regexp(self, string, regexp, prefix=''):
@@ -110,8 +127,22 @@ class RequestObject:
         self.query_string, self.headers = self.headers.split('\n')[0], self.headers.split('\n')[1:]
 
         # Находим хидер Content-type и парсим оттуда type и subtype
-        _content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
-        self.content_type.type, self.content_type.subtype = _content_type.split(': ')[1].split('; ')[0].split('/')
+
+
+        # if _content_type:
+        #     self.content_type.type, self.content_type.subtype = _content_type.split(': ')[1].split('; ')[0].split('/')
+        # else:
+        #     self.content_type.type, self.content_type.subtype = 'text', 'plain'
+
+    def _identify_content_type(self):
+        content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
+        '[type,subtype] -> type'
+        {'text': {'cmd': '', 'css': '', 'html': 'plain', 'javascript': '', 'plain': 'plain', 'php': '', 'xml': 'xml'}}
+        {'application': {'atom+xml': 'xml', 'EDI-X12': '', 'EDIFACT': '', 'json': 'json', 'javascript': '',
+                         'octet-stream': '', 'ogg': '', 'pdf': '', 'postscript': '', 'soap+xml': 'xml', 'font-woff': '',
+                         'xhtml+xml': 'xml', 'xml-dtd': 'xml', 'xop+xml': 'xml', 'zip': '', 'gzip': '',
+                         'x-bittorrent': '', 'x-tex': '', 'xml': 'xml'}}
+        {'audio':dict()}
 
 
 if __name__ == '__main__':
@@ -119,5 +150,5 @@ if __name__ == '__main__':
         request_string = f.read()
 
     ra = RequestAnalyzer(request_string)
-    print(ra.request_object.market_request)
+    print(ra.get_marked_request())
     exit()
