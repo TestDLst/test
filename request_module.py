@@ -1,4 +1,5 @@
 import re
+import json
 
 
 class RequestAnalyzer:
@@ -90,7 +91,10 @@ class RequestAnalyzer:
     def _mark_data_json(self):
         """Помечаются данные, представленные json"""
         _regexp = '''[ \[]"?([^{}\]\[]+?)["',}]'''
-        self.request_object.data = self._mark_by_regexp(self.request_object.data, _regexp)
+        data = self.request_object.data
+        # Нормализуем данные
+        data = json.dumps(json.loads(data))
+        self.request_object.data = self._mark_by_regexp(data, _regexp)
 
     def _mark_data_xml(self):
         """Помечаются данные, представленные xml"""
