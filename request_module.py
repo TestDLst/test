@@ -87,6 +87,9 @@ class RequestAnalyzer:
         self.request_object.data = self._mark_by_regexp(self.request_object.data, '=([^&]+)', '=')
         self.request_object.data = self._mark_empty_params(self.request_object.data)
 
+    def _mark_data_json(self):
+        pass
+
     def _mark_by_regexp(self, string, regexp, prefix=''):
         """Помечает параметры в строке по regexp'у
 
@@ -137,12 +140,12 @@ class RequestObject:
     def _identify_content_type(self):
         content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
         '[type,subtype] -> type'
-        {'text': {'cmd': '', 'css': '', 'html': 'plain', 'javascript': '', 'plain': 'plain', 'php': '', 'xml': 'xml'}}
+        '''{'text': {'cmd': '', 'css': '', 'html': 'plain', 'javascript': '', 'plain': 'plain', 'php': '', 'xml': 'xml'}}
         {'application': {'atom+xml': 'xml', 'EDI-X12': '', 'EDIFACT': '', 'json': 'json', 'javascript': '',
                          'octet-stream': '', 'ogg': '', 'pdf': '', 'postscript': '', 'soap+xml': 'xml', 'font-woff': '',
                          'xhtml+xml': 'xml', 'xml-dtd': 'xml', 'xop+xml': 'xml', 'zip': '', 'gzip': '',
                          'x-bittorrent': '', 'x-tex': '', 'xml': 'xml'}}
-        {'audio':dict()}
+        {'audio':dict()}'''
 
 
 if __name__ == '__main__':
