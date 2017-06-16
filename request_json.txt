@@ -1,0 +1,13 @@
+POST /formaup.php?test1=val1&test2=&test3=val3 HTTP/1.1
+Host: monitoring.kantiana.ru
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate
+Referer: http://monitoring.kantiana.ru/
+Cookie: _ym_uid=1491326072127721551; _ga=GA1.2.1787577537.1492609601
+Content-Type: application/json
+Connection: close
+Content-Length: 710
+
+{"orderID": 42,"customerName": "John Smith","customerPhoneN": "555-1234","orderContents": [{"productID": 23,"productName": "keyboard","quantity": 1},{"productID": 13,"productName": "mouse","quantity": 1}],"orderCompleted": [1, 2, 3, "x"]}
