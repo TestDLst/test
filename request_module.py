@@ -1,6 +1,9 @@
-import re
-from json_mark import MyJSONEncoder
 import json
+import re
+
+from bs4 import BeautifulSoup
+
+from json_mark import MyJSONEncoder
 
 
 class RequestAnalyzer:
@@ -69,8 +72,6 @@ class RequestAnalyzer:
 
         self.request_object.headers = modified_headers
 
-    # TODO: Парсить xml
-    # TODO: И ещё что-нибудь
     def _mark_data(self):
         """Помечает параметры в данных"""
         content_type = self.request_object.content_type
@@ -91,16 +92,26 @@ class RequestAnalyzer:
 
     def _mark_data_json(self):
         """Помечаются данные, представленные json"""
-        data = self.request_object.data
         json_encoder = MyJSONEncoder(self.injection_mark)
+        data = self.request_object.data
+
         data = json.loads(data)
         self.request_object.data = json_encoder.encode(data)
 
     def _mark_data_xml(self):
         """Помечаются данные, представленные xml"""
-        pass
+        # some kostyl
+        attr_regexp1 = '''(^version|^encoding)="(.+?)"'''
+        attr_regexp2 = '''='(.+?)\''''
+        item_regexp = '''<[^\/]+?>([^\<\>]+?)<\/.+?>'''
+        data = self.request_object.data
 
-    def _mark_by_regexp(self, string, regexp, prefix='', group=1):
+        data = self._mark_by_regexp(data, attr_regexp1)
+        data = self._mark_by_regexp(data, attr_regexp2)
+        data = self._mark_by_regexp(data, item_regexp)
+        self.request_object.data = data
+
+    def _mark_by_regexp(self, string, regexp, prefix='', group=1, flags=0):
         """Помечает параметры в строке по regexp'у
 
         :param string: Строка, в которой помечаются параметры
@@ -111,7 +122,7 @@ class RequestAnalyzer:
         string = re.sub(regexp,
                         lambda x: prefix + x.group(0).replace(x.group(group),
                                                               self.injection_mark.replace(' ', x.group(group))),
-                        string)
+                        string, flags=flags)
         return string
 
     def _mark_empty_params(self, string):
@@ -146,7 +157,6 @@ class RequestObject:
         self.headers, self.data = raw_request.split('\n\n')
         self.query_string, self.headers = self.headers.split('\n')[0], self.headers.split('\n')[1:]
 
-
         self._identify_content_type()
 
     def _identify_content_type(self):
@@ -158,12 +168,10 @@ class RequestObject:
             self.content_type = self.known_types.get(type).get(subtype)
 
 
-
 if __name__ == '__main__':
-    with open('request_json.txt') as f:
+    with open('request_xml') as f:
         request_string = f.read()
 
-    mj = MyJSONEncoder('vkasad')
     ra = RequestAnalyzer(request_string)
     print(ra.get_marked_request())
     exit()
