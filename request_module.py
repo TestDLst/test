@@ -166,7 +166,7 @@ class RequestObject:
         try:
             self.headers, self.data = raw_request.split('\n\n')
         except ValueError as ve:
-            self.headers, self.data = raw_request, ''
+            self.headers, self.data = raw_request, None
 
         self.query_string, self.headers = self.headers.split('\n')[0], [x for x in self.headers.split('\n')[1:] if x]
 
