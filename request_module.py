@@ -1,5 +1,5 @@
 import re
-import json
+from json_mark import MyJSONEncoder
 
 
 class RequestAnalyzer:
@@ -90,11 +90,14 @@ class RequestAnalyzer:
 
     def _mark_data_json(self):
         """Помечаются данные, представленные json"""
-        _regexp = '''[ \[]"?([^{}\]\[]+?)["',}]'''
+        # _regexp = '''[ \[]"?([^{}\]\[]+?)["',}]'''
         data = self.request_object.data
+        json_encoder = MyJSONEncoder(self.injection_mark)
         # Нормализуем данные
-        data = json.dumps(json.loads(data))
-        self.request_object.data = self._mark_by_regexp(data, _regexp)
+        # data = json.dumps(json.loads(data))
+        # print(data)
+        # self.request_object.data = self._mark_by_regexp(data, _regexp)
+        # self.request_object.data = json_encoder.encode()
 
     def _mark_data_xml(self):
         """Помечаются данные, представленные xml"""
@@ -158,10 +161,12 @@ class RequestObject:
             self.content_type = self.known_types.get(type).get(subtype)
 
 
+
 if __name__ == '__main__':
     with open('request_json.txt') as f:
         request_string = f.read()
 
+    mj = MyJSONEncoder('vkasad')
     ra = RequestAnalyzer(request_string)
     print(ra.get_marked_request())
     exit()
