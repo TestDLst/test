@@ -1,5 +1,6 @@
 import re
 from json_mark import MyJSONEncoder
+import json
 
 
 class RequestAnalyzer:
@@ -93,11 +94,10 @@ class RequestAnalyzer:
         # _regexp = '''[ \[]"?([^{}\]\[]+?)["',}]'''
         data = self.request_object.data
         json_encoder = MyJSONEncoder(self.injection_mark)
-        # Нормализуем данные
-        # data = json.dumps(json.loads(data))
+        data = json.loads(data)
         # print(data)
         # self.request_object.data = self._mark_by_regexp(data, _regexp)
-        # self.request_object.data = json_encoder.encode()
+        self.request_object.data = json_encoder.encode(data)
 
     def _mark_data_xml(self):
         """Помечаются данные, представленные xml"""
