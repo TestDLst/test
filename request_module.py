@@ -20,7 +20,9 @@ class RequestAnalyzer:
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
         self.extra_headers = {
-            'User-Agent'
+            'User-Agent' : 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30',
+            'X-Forwarded-For': '127.0.0.1',
+            'X-Forwarded-Host': 'localhost'
         }
 
         self.request_object = RequestObject(request)
@@ -69,6 +71,10 @@ class RequestAnalyzer:
                 print('[!] Exception in _mark_headers. Message: {}'.format(ve))
 
             modified_headers.append(': '.join([name, value]))
+
+        for header, value in self.extra_headers.items():
+            if header not in self.all_headers:
+                modified_headers.append(': '.join([header, self.injection_mark.replace(' ', value)]))
 
         self.request_object.headers = modified_headers
 
