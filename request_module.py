@@ -80,6 +80,9 @@ class RequestAnalyzer:
 
     def _mark_data(self):
         """Помечает параметры в данных"""
+        if not self.request_object.data:
+            return
+
         content_type = self.request_object.content_type
 
         if content_type == 'plain':
@@ -160,8 +163,12 @@ class RequestObject:
         """ Распаковывает сырой запрос в объект"""
         # Разбиваем сырой запрос на 'строку запроса', 'хидеры' и 'дату'
         # на винде лажа с \r\n, остаются \n при считывании
-        self.headers, self.data = raw_request.split('\n\n')
-        self.query_string, self.headers = self.headers.split('\n')[0], self.headers.split('\n')[1:]
+        try:
+            self.headers, self.data = raw_request.split('\n\n')
+        except ValueError as ve:
+            self.headers, self.data = raw_request, ''
+
+        self.query_string, self.headers = self.headers.split('\n')[0], [x for x in self.headers.split('\n')[1:] if x]
 
         self._identify_content_type()
 
