@@ -10,4 +10,4 @@ Content-Length: 158
 Cookie: _ym_uid=1491326072127721551; _ga=GA1.2.1787577537.1492609601; _ym_isad=2; _gid=GA1.2.716734137.1497624682; grafana_sess=dc12c7a4c3e225a2; redirect_to=%252F; grafana_user=zvyyvjleb%40emltmp.com; grafana_remember=2312c4156ae77ca56ca863ebb16b27078d9f648f05107871ad0566272860d1098a952e8de19f55d37ce55ebd
 Connection: close
 
-{"jsonrpc":"2.0","method":"application.get","params":{"output":["applicationid","name"],"hostids":["10151"]},"id":1,"auth":"089433374694bcd8f5d83b7a56f4533c"}
+{"jsonrpc":"2.0","test":true,"method":"application.get","params":{"output":["applicationid","name"],"hostids":[10151, 123123.12, "123"]},"id":1.1,"auth":"089433374694bcd8f5d83b7a56f4533c"}
