@@ -4,8 +4,12 @@ class RequestObject:
         self.market_request = ''
 
         self.query_string = ''
-        self.headers = ''
-        self.content_type = 'plain'
+        self.method = ''
+        self.url_path = ''
+        self.host = ''
+
+        self.headers = dict()
+        self.content_type = None
         self.data = ''
         self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
                             'application': {'atom+xml': 'xml', 'json': 'json', 'soap+xml': 'xml', 'xhtml+xml': 'xml',
@@ -22,7 +26,10 @@ class RequestObject:
         except ValueError as ve:
             self.headers, self.data = raw_request, None
 
-        self.query_string, self.headers = self.headers.split('\n')[0], [x for x in self.headers.split('\n')[1:] if x]
+        self.query_string, *self.headers = self.headers.split('\n')
+        self.method, self.url_path, *_ = self.query_string.split()
+        self.headers = dict([i.split(': ') for i in self.headers])
+        self.host = self.headers['Host']
 
         self._identify_content_type()
 
@@ -33,3 +40,11 @@ class RequestObject:
         if content_type:
             type, subtype = content_type.split(': ')[1].split('/')
             self.content_type = self.known_types.get(type).get(subtype)
+
+
+if __name__ == '__main__':
+    with open('test_requests/request.txt') as f:
+        raw_request = f.read()
+
+    ro = RequestObject(raw_request)
+    print('1')
