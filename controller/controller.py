@@ -4,6 +4,7 @@ from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
 
+
 class Controller:
     def __init__(self, config):
         # Объявления
@@ -13,9 +14,7 @@ class Controller:
 
         # Логика
         # Тест RequestModifier'а
-        with open(self.config['Program']['script_path']+'/payloads/fuzzing/test.txt') as f:
-            meta_payloads = f.read().split('\n')
-
+        meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
         print(self.modified_requests[2].raw_request)
 
@@ -39,3 +38,13 @@ class Controller:
         with open(self.config['Main']['file']) as f:
             initial_request = f.read()
         return RequestObject(initial_request)
+
+    def get_payloads(self, payload_path):
+        """
+
+        :param payload_path: путь до файла с нагрузками относительно дирестории payloads
+        :return: Список нагрузок payloads
+        """
+        with open(self.config['Program']['script_path']+'/payloads' + payload_path) as f:
+            payloads = f.read().split('\n')
+        return payloads
