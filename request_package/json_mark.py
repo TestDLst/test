@@ -99,21 +99,21 @@ class MyJSONEncoder(JSONEncoder):
                     buf = separator
                 if isinstance(value, str):
                     # yield buf + _encoder(value)
-                    yield buf + _encoder(self.injection_mark.replace(' ',value))
+                    yield buf + _encoder(self.injection_mark.format(value))
                 elif value is None:
-                    yield buf + self.injection_mark.replace(' ','null')
+                    yield buf + self.injection_mark.format('null')
                 elif value is True:
-                    yield buf + self.injection_mark.replace(' ','true')
+                    yield buf + self.injection_mark.format('true')
                 elif value is False:
-                    yield buf + self.injection_mark.replace(' ','false')
+                    yield buf + self.injection_mark.format('false')
                 elif isinstance(value, int):
                     # Subclasses of int/float may override __str__, but we still
                     # want to encode them as integers/floats in JSON. One example
                     # within the standard library is IntEnum.
-                    yield buf + self.injection_mark.replace(' ', _intstr(value))
+                    yield buf + self.injection_mark.format( _intstr(value))
                 elif isinstance(value, float):
                     # see comment above for int
-                    yield buf + self.injection_mark.replace(' ', _floatstr(value))
+                    yield buf + self.injection_mark.format( _floatstr(value))
                 else:
                     yield buf
                     if isinstance(value, (list, tuple)):
@@ -181,19 +181,19 @@ class MyJSONEncoder(JSONEncoder):
                 yield _encoder(key)
                 yield _key_separator
                 if isinstance(value, str):
-                    yield _encoder(self.injection_mark.replace(' ', value))
+                    yield _encoder(self.injection_mark.format( value))
                 elif value is None:
-                    yield self.injection_mark.replace(' ', 'null')
+                    yield self.injection_mark.format( 'null')
                 elif value is True:
-                    yield self.injection_mark.replace(' ', 'true')
+                    yield self.injection_mark.format( 'true')
                 elif value is False:
-                    yield self.injection_mark.replace(' ', 'false')
+                    yield self.injection_mark.format( 'false')
                 elif isinstance(value, int):
                     # see comment for int/float in _make_iterencode
-                    yield self.injection_mark.replace(' ', _intstr(value))
+                    yield self.injection_mark.format( _intstr(value))
                 elif isinstance(value, float):
                     # see comment for int/float in _make_iterencode
-                    yield self.injection_mark.replace(' ', _floatstr(value))
+                    yield self.injection_mark.format( _floatstr(value))
                 else:
                     if isinstance(value, (list, tuple)):
                         chunks = _iterencode_list(value, _current_indent_level)
@@ -213,17 +213,17 @@ class MyJSONEncoder(JSONEncoder):
             if isinstance(o, str):
                 yield _encoder(o)
             elif o is None:
-                yield self.injection_mark.replace(' ', 'null')
+                yield self.injection_mark.format( 'null')
             elif o is True:
-                yield self.injection_mark.replace(' ', 'true')
+                yield self.injection_mark.format( 'true')
             elif o is False:
-                yield self.injection_mark.replace(' ', 'false')
+                yield self.injection_mark.format( 'false')
             elif isinstance(o, int):
                 # see comment for int/float in _make_iterencode
-                yield self.injection_mark.replace(' ', _intstr(o))
+                yield self.injection_mark.format( _intstr(o))
             elif isinstance(o, float):
                 # see comment for int/float in _make_iterencode
-                yield self.injection_mark.replace(' ', _floatstr(o))
+                yield self.injection_mark.format( _floatstr(o))
             elif isinstance(o, (list, tuple)):
                 yield from _iterencode_list(o, _current_indent_level)
             elif isinstance(o, dict):
