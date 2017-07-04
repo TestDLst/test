@@ -1,5 +1,7 @@
 import re
 
+from request_package.request_object import RequestObject
+
 
 class RequestModifier:
     def __init__(self, marked_request, payloads, config):
@@ -31,4 +33,4 @@ class RequestModifier:
         for payload in self.payloads:
             _modified_request = match.string[:start] + match.string[start:end] + payload + match.string[end:]
             _modified_request = _modified_request.replace(self.injection_mark, '')
-            self.modified_requests.append(_modified_request)
+            self.modified_requests.append(RequestObject(_modified_request))

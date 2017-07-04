@@ -15,10 +15,9 @@ class Controller:
         # Тест RequestModifier'а
         with open(self.config['Program']['script_path']+'/payloads/fuzzing/metacharacters.txt') as f:
             meta_payloads = f.read()
-        # response_queue = Queue()
 
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        # print(self.modified_requests)
+        print(self.modified_requests[0])
 
     def search_hidden_parameters(self):
         pass

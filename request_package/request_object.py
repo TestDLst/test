@@ -16,18 +16,18 @@ class RequestObject:
                             'application': {'atom+xml': 'xml', 'json': 'json', 'soap+xml': 'xml', 'xhtml+xml': 'xml',
                                             'xml-dtd': 'xml', 'xop+xml': 'xml', 'xml': 'xml'}}
 
+        self.normalize_raw_request()
         self._parse_request(self.raw_request)
 
     def _parse_request(self, raw_request):
         """ Распаковывает сырой запрос в объект"""
         # Разбиваем сырой запрос на 'строку запроса', 'хидеры' и 'дату'
-        # на винде лажа с \r\n, остаются \n при считывании
         try:
-            self.headers, self.data = raw_request.split('\n\n')
+            self.headers, self.data = raw_request.split('\r\n\r\n')
         except ValueError as ve:
             self.headers, self.data = raw_request, None
 
-        self.query_string, *self.headers = self.headers.split('\n')
+        self.query_string, *self.headers = self.headers.split('\r\n')
         self.method, self.url_path, *_ = self.query_string.split()
         self.host = self.headers[0].split(': ')[1].strip()
 
@@ -40,6 +40,11 @@ class RequestObject:
         if content_type:
             type, subtype = content_type.split(': ')[1].split('/')
             self.content_type = self.known_types.get(type).get(subtype)
+
+    def normalize_raw_request(self):
+        "Приводит сырой запрос к стандарту"
+        if not '\r\n' in self.raw_request:
+            self.raw_request = self.raw_request.replace('\n', '\r\n')
 
 
 if __name__ == '__main__':
