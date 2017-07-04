@@ -1,3 +1,3 @@
 class Controller:
-    def __init__(self, arguments, config):
+    def __init__(self, config):
         pass
