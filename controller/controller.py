@@ -13,11 +13,11 @@ class Controller:
 
         # Логика
         # Тест RequestModifier'а
-        with open(self.config['Program']['script_path']+'/payloads/fuzzing/metacharacters.txt') as f:
-            meta_payloads = f.read()
+        with open(self.config['Program']['script_path']+'/payloads/fuzzing/test.txt') as f:
+            meta_payloads = f.read().split('\n')
 
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        print(self.modified_requests[0])
+        print(self.modified_requests[2].raw_request)
 
     def search_hidden_parameters(self):
         pass

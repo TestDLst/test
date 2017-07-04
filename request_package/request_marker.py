@@ -5,7 +5,6 @@ from request_package.json_mark import MyJSONEncoder
 from request_package.request_object import RequestObject
 
 
-# TODO: injection_mark брать из конфиги
 class RequestMarker:
     # TODO: отмечать параметры запросах REST стиля
     def __init__(self, request_object, config):
