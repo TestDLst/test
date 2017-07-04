@@ -23,10 +23,11 @@ class RequestModifier:
         """
         # TODO: Исправить траблу с юникодом в injection_mark
         pattern = '.+?'.join([self.injection_mark] * 2)
-
+        # Продумать re.sub
         for payload in self.payloads:
             _modified_request = re.sub(pattern, lambda x: x.group(0) + payload, self.marked_request)
             _modified_request = _modified_request.replace(self.injection_mark, '')
             self.modified_requests.append(_modified_request)
+            print(_modified_request)
 
         return self.modified_requests

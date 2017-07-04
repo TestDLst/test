@@ -18,7 +18,7 @@ class Controller:
         # response_queue = Queue()
 
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        print(self.modified_requests)
+        # print(self.modified_requests)
 
     def search_hidden_parameters(self):
         pass

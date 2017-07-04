@@ -15,7 +15,7 @@ class RequestMarker:
         :param config: объект конфгурации
         """
         self.config = config
-        self.injection_mark = ' '.join(self.config['Program']['injection_mark'] * 2)
+        self.injection_mark = ' '.join([self.config['Program']['injection_mark']] * 2)
 
         self.excluded_headers = {'Host', 'Accept',
                                  'Accept-Language'}  # Если можно будет указывать, какие параметры пропускать
