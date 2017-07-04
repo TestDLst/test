@@ -8,7 +8,8 @@ class RequestObject:
         self.url_path = ''
         self.host = ''
 
-        self.headers = dict()
+        # хидеры должны быть в том же порядке, в котором пришли
+        self.headers = []
         self.content_type = None
         self.data = ''
         self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
@@ -28,8 +29,7 @@ class RequestObject:
 
         self.query_string, *self.headers = self.headers.split('\n')
         self.method, self.url_path, *_ = self.query_string.split()
-        self.headers = dict([i.split(': ') for i in self.headers])
-        self.host = self.headers['Host']
+        self.host = self.headers[0].split(': ')[1].strip()
 
         self._identify_content_type()
 

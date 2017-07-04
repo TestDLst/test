@@ -1,22 +1,24 @@
 import json
 import re
 
-from request_object import RequestObject
-
 from request_package.json_mark import MyJSONEncoder
+from request_package.request_object import RequestObject
 
 
-class RequestAnalyzer:
+# TODO: injection_mark брать из конфиги
+class RequestMarker:
     # TODO: отмечать параметры запросах REST стиля
-    def __init__(self, request, injection_mark='§ §'):
+    def __init__(self, request_object, config):
         """Создает экзепляр класса RequestAnalyzer
 
-        :param request: строка, содержащая сырой валидный запрос к серверу (например запросы из burpsuite)
-        :param injection_mark: символы, разделенные пробелом, помечающие точки инъекции
+        :param request_object: RequestObject экземпляр
+        :param config: объект конфгурации
         """
-        self.injection_mark = injection_mark
+        self.config = config
+        self.injection_mark = ' '.join(self.config['Program']['injection_mark'] * 2)
 
-        self.excluded_headers = {'Host'}  # Если можно будет указывать, какие параметры пропускать
+        self.excluded_headers = {'Host', 'Accept',
+                                 'Accept-Language'}  # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
         self.extra_headers = {
@@ -26,7 +28,7 @@ class RequestAnalyzer:
             'X-Forwarded-Host': 'localhost'
         }
 
-        self.request_object = RequestObject(request)
+        self.request_object = request_object
 
         self._mark_request()
 
@@ -71,10 +73,12 @@ class RequestAnalyzer:
                     else:
                         value = self._mark_by_regexp(value, '=([^\s;]+);?')
 
+                modified_headers.append(': '.join([name, value]))
+
             except ValueError as ve:
                 print('[!] Exception in _mark_headers. Message: {}'.format(ve))
 
-            modified_headers.append(': '.join([name, value]))
+
 
         for header, value in self.extra_headers.items():
             if header not in self.all_headers:

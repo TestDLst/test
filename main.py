@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import sys
 import os
 import re
 
@@ -7,15 +8,18 @@ from controller.controller import Controller
 
 
 # TODO: Создавать конфиг файл. В случае его отсутствия предлагать создать новый
+# TODO: Добавить --exclude/--include параметры
 class Main:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.arguments = self.get_arguments()
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
 
         self.check_config_exist()
         self.config_path = self.arguments.config_file if self.arguments.config_file else 'config.ini'
         self.config = self.read_config(self.config_path)
 
+        # Указываем параметры без консоли
         self._test()
         self.check_arguments()
 
@@ -24,7 +28,10 @@ class Main:
         if self.arguments.update_config:
             self.save_current_config()
 
-        # После merge передавать только self.config
+        # Для импорта по пути относительно main.py
+        # Потестить
+        sys.path.append(self.script_path)
+
         self.controller = Controller(self.config)
 
     # Потестить
@@ -46,9 +53,9 @@ class Main:
     def check_arguments(self):
         _args, _cfg = self.arguments, self.config
 
-        if not _args.url and not _cfg['MAIN']['url']:
+        if not _args.url and not _cfg['Main']['url']:
             self._print_error_message('Не найден url адрес цели')
-        if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['MAIN']['file']:
+        if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['Main']['file']:
             self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле')
 
         del _args, _cfg
@@ -71,30 +78,32 @@ class Main:
     # Потестить
     def merge_args_to_config(self):
         if self.arguments.url:
-            self.config['Main']['Url'] = self.arguments.url
+            self.config['Main']['url'] = self.arguments.url
         if self.arguments.url:
-            self.config['Main']['File'] = self.arguments.file
+            self.config['Main']['file'] = self.arguments.file
         if self.arguments.threads:
-            self.config['Main']['Threads'] = str(self.arguments.threads)
+            self.config['Main']['threads'] = str(self.arguments.threads)
 
         # Парсим --url
         protocol = self.arguments.url.split('://')[0] if '://' in self.arguments.url \
-            else self.config['RequestInfo']['Protocol']
+            else self.config['RequestInfo']['protocol']
         port = re.search(':(\d+)\/?', self.arguments.url)
-        port = port.group(1) if port else self.config['RequestInfo']['Port']
+        port = port.group(1) if port else self.config['RequestInfo']['port']
 
         # Распихиваем --url по конфигу
-        self.config['RequestInfo']['Protocol'] = protocol
-        self.config['RequestInfo']['Port'] = port
+        self.config['RequestInfo']['protocol'] = protocol
+        self.config['RequestInfo']['port'] = port
+        # Указываем путь до main.py
+        self.config['Program']['script_path'] = self.script_path
 
     # Потестить нестандартный путь
     def read_config(self, path=None):
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
-            config.read('config.ini')
+            config.read_file(open('config.ini','rb',encoding='utf8'))
         else:
-            config.read(path)
+            config.read_file(open(path))
         return config
 
     def save_current_config(self):
