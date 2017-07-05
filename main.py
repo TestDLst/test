@@ -3,6 +3,7 @@ import configparser
 import sys
 import os
 import re
+import codecs
 
 from controller.controller import Controller
 
@@ -101,13 +102,14 @@ class Main:
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
-            config.read_file(open('config.ini','rb',encoding='utf8'))
+            # config.read_file(open('config.ini','rb',encoding='utf8'))
+            config.read_file(codecs.open('config.ini','r',encoding='utf8'))
         else:
-            config.read_file(open(path))
+            config.read_file(codecs.open(path,'r',encoding='utf8'))
         return config
 
     def save_current_config(self):
-        with open(self.config_path,'w') as config_file:
+        with codecs.open(self.config_path, 'w', encoding='utf8') as config_file:
             self.config.write(config_file)
 
     def _test(self):

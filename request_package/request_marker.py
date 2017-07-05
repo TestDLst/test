@@ -5,7 +5,6 @@ from request_package.json_mark import MyJSONEncoder
 from request_package.request_object import RequestObject
 
 
-# TODO: injection_mark брать из конфиги
 class RequestMarker:
     # TODO: отмечать параметры запросах REST стиля
     def __init__(self, request_object, config):
@@ -15,7 +14,7 @@ class RequestMarker:
         :param config: объект конфгурации
         """
         self.config = config
-        self.injection_mark = ' '.join([self.config['Program']['injection_mark']] * 2)
+        self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
 
         self.excluded_headers = {'Host', 'Accept',
                                  'Accept-Language'}  # Если можно будет указывать, какие параметры пропускать
@@ -69,7 +68,7 @@ class RequestMarker:
                     # Эвристика
                     if (' ' not in value) or (';' not in value and '=' not in value) \
                             or (';' in value and '=' not in value):
-                        value = self.injection_mark.replace(' ', value)
+                        value = self.injection_mark.format(value)
                     else:
                         value = self._mark_by_regexp(value, '=([^\s;]+);?')
 
@@ -82,7 +81,7 @@ class RequestMarker:
 
         for header, value in self.extra_headers.items():
             if header not in self.all_headers:
-                modified_headers.append(': '.join([header, self.injection_mark.replace(' ', value)]))
+                modified_headers.append(': '.join([header, self.injection_mark.format(value)]))
 
         self.request_object.headers = modified_headers
 
@@ -138,7 +137,7 @@ class RequestMarker:
         """
         string = re.sub(regexp,
                         lambda x: prefix + x.group(0).replace(x.group(group),
-                                                              self.injection_mark.replace(' ', x.group(group))),
+                                                              self.injection_mark.format(x.group(group))),
                         string, flags=flags)
         return string
 
@@ -148,4 +147,4 @@ class RequestMarker:
         :param string: Строка, в которой пустые параметры ищутся
         :return: Измененная строка string
         """
-        return re.sub('=(&|$)', lambda x: '=' + self.injection_mark + ('&' if '&' in x.group() else ''), string)
+        return re.sub('=(&|$)', lambda x: '=' + self.injection_mark.format('') + ('&' if '&' in x.group() else ''), string)
