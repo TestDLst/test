@@ -1,5 +1,7 @@
 class RequestObject:
-    def __init__(self, request):
+    def __init__(self, request, _testing_param=None):
+        self._testing_param = _testing_param
+
         self.raw_request = request
         self.raw_response = ''
         self.market_request = ''

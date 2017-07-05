@@ -6,7 +6,8 @@ from request_package.request_object import RequestObject
 
 
 class RequestMarker:
-    # TODO: отмечать параметры запросах REST стиля
+    # TODO: Разобраться с X-Forwarded-For: 127.0.0.1, 127.0.0.1
+    # TODO: пропускать уже помеченные параметры
     def __init__(self, request_object, config):
         """Создает экзепляр класса RequestAnalyzer
 
@@ -16,8 +17,8 @@ class RequestMarker:
         self.config = config
         self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
 
-        self.excluded_headers = {'Host', 'Accept',
-                                 'Accept-Language'}  # Если можно будет указывать, какие параметры пропускать
+        self.excluded_headers = {'Host', 'Accept', 'Accept-Language','Accept-Encoding', 'Connection',
+                                 'Content-Length'}  # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
         self.extra_headers = {
