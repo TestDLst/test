@@ -3,6 +3,7 @@ from queue import Queue
 from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
+from request_package.requester import Requester
 
 
 class Controller:
@@ -17,6 +18,12 @@ class Controller:
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
         print(self.modified_requests[2].raw_request)
+
+        # Тест Requester
+        self.response_queue = Queue()
+        requester = Requester(self.modified_requests, self.response_queue, self.config)
+        requester.wait_completion()
+        print("end")
 
     def search_hidden_parameters(self):
         pass

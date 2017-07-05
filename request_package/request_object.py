@@ -1,6 +1,7 @@
 class RequestObject:
     def __init__(self, request):
         self.raw_request = request
+        self.raw_response = ''
         self.market_request = ''
 
         self.query_string = ''

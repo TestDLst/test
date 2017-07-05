@@ -46,39 +46,48 @@ class ThreadPool:
 
 
 class Requester:
-    def __init__(self, requests, response_queue, num_threads):
+    def __init__(self, requests, response_queue, config):
         self.response_queue = response_queue
         self.requests = requests
+        self.config = config
 
-        self.num_threads = num_threads
+        self.num_threads = int(self.config['Main']['threads'])
         self.pool = ThreadPool(self.num_threads)
 
         self.pool.map(self._send_request, self.requests)
-        self.pool.wait_completion()
+
+    def add_response(self, response):
+        """ Add a response to the response_queue """
+        self.response_queue.put(response)
 
     def _send_request(self, request):
-        pass
+        protocol = self.config['RequestInfo']['protocol'].lower()
+        port = self.config['RequestInfo']['port']
 
+        if protocol == 'http':
+            connection = client.HTTPConnection(request.host)
+        elif protocol == 'https':
+            connection = client.HTTPSConnection(request.host)
+        else:
+            """Exception"""
+            pass
 
-if __name__ == "__main__":
-    from random import randrange
-    from time import sleep
+        headers = dict([i.split(': ') for i in request.headers])
 
-    # Function to be executed in a thread
-    def wait_delay(d):
-        print("sleeping for (%d)sec" % d)
-        sleep(d)
+        if request.method == 'GET':
+            connection.request(request.method, request.url_path, headers=headers)
+        elif request.method == 'POST':
+            connection.request(request.method, request.url_path, request.data, headers=headers)
+        else:
+            """Exception"""
+            pass
 
-    # Generate random delays
-    delays = [randrange(1, 4) for i in range(10)]
+        resp = connection.getresponse()
+        request.raw_response = resp.read()
+        connection.close()
+        
+        self.add_response(request)
 
-    # Instantiate a thread pool with 5 worker threads
-    pool = ThreadPool(5)
+    def wait_completion(self):
+        self.pool.wait_completion()
 
-    # Add the jobs in bulk to the thread pool. Alternatively you could use
-    # `pool.add_task` to add single jobs. The code will block here, which
-    # makes it possible to cancel the thread pool with an exception when
-    # the currently running batch of workers is finished.
-    pool.map(wait_delay, delays)
-    pool.wait_completion()
-    print("END")
