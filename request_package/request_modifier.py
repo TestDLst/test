@@ -33,11 +33,12 @@ class RequestModifier:
 
     def _modify_query_string(self):
         pattern = '([^?&]+)=({mark}{mark}|{mark}.+?{mark})'.format(mark=self.injection_mark)
-        re.sub(pattern, self._test1, self.marked_request.query_string)
+        re.sub(pattern, self._feed_query_string, self.marked_request.query_string)
 
-    def _test1(self, match):
+    def _feed_query_string(self, match):
         start, end = match.regs[2]
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
+
         for payload in self.payloads:
             modified_value = match.string[start:end] + payload
             modified_query_string = match.string[:start] + modified_value + match.string[end:]
@@ -53,9 +54,11 @@ class RequestModifier:
 
         for ind, header in enumerate(self.marked_request.headers):
             marked_values = list(re.finditer(marked_values_regexp, header))
+
             if marked_values:
                 for match in marked_values:
                     start, end = match.regs[0]
+
                     for payload in self.payloads:
                         modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
                         modified_header = header[:start] + modified_value + header[end:]
