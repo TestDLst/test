@@ -74,13 +74,7 @@ class Requester:
 
         headers = dict([i.split(': ') for i in request.headers])
 
-        if request.method == 'GET':
-            connection.request(request.method, request.url_path, headers=headers)
-        elif request.method == 'POST':
-            connection.request(request.method, request.url_path, request.data, headers=headers)
-        else:
-            """Exception"""
-            pass
+        connection.request(request.method, request.url_path, request.data, headers=headers)
 
         resp = connection.getresponse()
         request.raw_response = resp.read()
