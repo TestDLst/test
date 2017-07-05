@@ -42,7 +42,8 @@ class RequestObject:
 
         if content_type:
             type, subtype = content_type.split(': ')[1].split('/')
-            self.content_type = self.known_types.get(type).get(subtype)
+            self.content_type = self.known_types.get(type)
+            self.content_type = self.content_type.get(subtype) if self.content_type else None
 
     def normalize_raw_request(self):
         "Приводит сырой запрос к стандарту"

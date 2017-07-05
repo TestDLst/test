@@ -17,7 +17,7 @@ class RequestMarker:
         self.config = config
         self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
 
-        self.excluded_headers = {'Host', 'Accept', 'Accept-Language','Accept-Encoding', 'Connection',
+        self.excluded_headers = {'Host', 'Accept', 'Accept-Language','Accept-Encoding', 'Connection', 'Content-Type',
                                  'Content-Length'}  # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
@@ -71,7 +71,7 @@ class RequestMarker:
                             or (';' in value and '=' not in value):
                         value = self.injection_mark.format(value)
                     else:
-                        value = self._mark_by_regexp(value, '=([^\s;]+);?')
+                        value = self._mark_by_regexp(value, '([\S]+?=[^\s;]+)')
 
                 modified_headers.append(': '.join([name, value]))
 

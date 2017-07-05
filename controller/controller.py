@@ -13,12 +13,12 @@ class Controller:
         self.initial_request = self.get_initial_request()
         self.marked_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
-        print(self.marked_request)
+
         # Логика
         # Тест RequestModifier'а
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        # print(self.modified_requests[3]._testing_param)
+        print(self.modified_requests[19]._testing_param)
 
         # Тест Requester
         # self.response_queue = Queue()
