@@ -85,7 +85,7 @@ class Requester:
         resp = connection.getresponse()
         request.raw_response = resp.read()
         connection.close()
-        
+
         self.add_response(request)
 
     def wait_completion(self):
