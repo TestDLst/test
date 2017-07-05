@@ -65,7 +65,7 @@ class RequestModifier:
                         modified_header = header[:start] + modified_value + header[end:]
                         modified_headers = self.marked_request.headers_list[:ind] + [modified_header] \
                                            + self.marked_request.headers_list[ind + 1:]
-                        modified_raw_request = '\r\n'.join([self.marked_request.query_string] + modified_headers)\
+                        modified_raw_request = '\r\n'.join([self.marked_request.query_string] + modified_headers) \
                                                + '\r\n\r\n' + self.marked_request.data
                         modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
                         testing_param = 'Header: {}, Value: {}'.format(header.split(': ')[0], modified_value)
@@ -74,13 +74,17 @@ class RequestModifier:
     def _modify_data(self):
         if self.marked_request.content_type == 'plain':
             pattern = '([^?&]+)=({mark}{mark}|{mark}.+?{mark})'.format(mark=self.injection_mark)
+            func = self._feed_plain_data
         elif self.marked_request.content_type == 'json':
-            print('pisos')
-        elif self.marked_request.content_type =='xml':
-            pass
+            pattern = '{mark}.+?{mark}'.format(mark=self.injection_mark)
+            func = self._feed_json_data
+        elif self.marked_request.content_type == 'xml':
+            pattern = '<.+?>{mark}.+?{mark}<\/.+?>'
+            func = self._feed_xml_data
         else:
             exit()
 
+        re.sub(pattern, func, self.marked_request.data)
 
     def _feed_plain_data(self, match):
         start, end = match.regs[2]
@@ -95,3 +99,49 @@ class RequestModifier:
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
 
             self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+
+    def _feed_json_data(self, match):
+        start, end = match.regs[0]
+        for payload in self.payloads:
+            _start, _end = self._get_testing_json_param_pos(match, len(payload))
+            modified_value = match.string[start:end] + payload
+            modified_data = match.string[:start] + modified_value + match.string[end:]
+            testing_param = modified_data[_start:_end].replace(self.injection_mark, '')
+            modified_raw_request = '\r\n'.join([self.marked_request.query_string] + self.marked_request.headers_list) \
+                                   + '\r\n\r\n' + modified_data
+            modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
+
+            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+
+    def _get_testing_json_param_pos(self, match, payload_len):
+        start, end = match.regs[0]
+        brackets = 0
+        while True:
+            start -= 1
+            if match.string[start] == ':':
+                break
+            elif match.string[start] == '[':
+                brackets += 1
+        if match.string[start - 1] == '"':
+            start -= 2
+            while True:
+                if match.string[start] == '"' and match.string[start - 1] != '\\':
+                    break
+                start -= 1
+        else:
+            start -= 2
+            while match.string[start] not in [' ', '{']:
+                start -= 1
+        while brackets > 0:
+            if match.string[end] == ']':
+                brackets -= 1
+            elif match.string[end] == '[':
+                brackets += 1
+            end += 1
+        end += 1 if match.string[end] == '"' else 0
+        return start, end + payload_len
+
+    # TODO: незабыть про аттрибуты (отельно для аттрибутов с = и отдельно теги)
+    def _feed_xml_data(self, match):
+
+        pass

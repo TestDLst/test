@@ -10,3 +10,33 @@ Content-Length: 158
 Cookie: _ym_uid=1491326072127721551; _ga=GA1.2.1787577537.1492609601; _ym_isad=2; _gid=GA1.2.716734137.1497624682; grafana_sess=dc12c7a4c3e225a2; redirect_to=%252F; grafana_user=zvyyvjleb%40emltmp.com; grafana_remember=2312c4156ae77ca56ca863ebb16b27078d9f648f05107871ad0566272860d1098a952e8de19f55d37ce55ebd
 Connection: close
 
+<?xml version="1.0"?>
+<!DOCTYPE PARTS SYSTEM "parts.dtd">
+<?xml-stylesheet type="text/css" href="xmlpartsstyle.css"?>
+<PARTS>
+   <TITLE>Computer Parts</TITLE>
+   <PART>
+      <ITEM>Motherboard</ITEM>
+      <MANUFACTURER>ASUS</MANUFACTURER>
+      <MODEL>P3B-F</MODEL>
+      <COST> 123.00</COST>
+   </PART>
+   <PART>
+      <ITEM>Video Card</ITEM>
+      <MANUFACTURER>ATI</MANUFACTURER>
+      <MODEL>All-in-Wonder Pro</MODEL>
+      <COST> 160.00</COST>
+   </PART>
+   <PART>
+      <ITEM>Sound Card</ITEM>
+      <MANUFACTURER>Creative Labs</MANUFACTURER>
+      <MODEL>Sound Blaster Live</MODEL>
+      <COST> 80.00</COST>
+   </PART>
+   <PART>
+      <ITEMᡋ inch Monitor</ITEM>
+      <MANUFACTURER>LG Electronics</MANUFACTURER>
+      <MODEL> 995E</MODEL>
+      <COST> 290.00</COST>
+   </PART>
+</PARTS>
