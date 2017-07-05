@@ -16,7 +16,7 @@ class Controller:
         # Тест RequestModifier'а
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        print(self.modified_requests[2].raw_request)
+        print(self.modified_requests[3].raw_request)
 
     def search_hidden_parameters(self):
         pass

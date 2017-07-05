@@ -1,7 +1,7 @@
 class RequestObject:
     def __init__(self, request):
         self.raw_request = request
-        self.market_request = ''
+        self.marked_request = ''
 
         self.query_string = ''
         self.method = ''
