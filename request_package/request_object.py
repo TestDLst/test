@@ -12,7 +12,8 @@ class RequestObject:
         self.host = ''
 
         # хидеры должны быть в том же порядке, в котором пришли
-        self.headers = []
+        self.headers = dict()
+        self.headers_list = []
         self.content_type = None
         self.data = ''
         self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
@@ -32,18 +33,23 @@ class RequestObject:
 
         self.query_string, *self.headers = self.headers.split('\r\n')
         self.method, self.url_path, *_ = self.query_string.split()
-        self.host = self.headers[0].split(': ')[1].strip()
+        self.headers_list = self.headers[:]
+        self.headers = dict([i.split(': ') for i in self.headers])
+        self.host = self.headers['Host']
 
         self._identify_content_type()
 
     def _identify_content_type(self):
         """Находит хидер Content-type, парсит type и subtype и определяет по known_types форму данных"""
-        content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
+        # content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
+        content_type = self.headers.get('Content-Type')
 
         if content_type:
-            type, subtype = content_type.split(': ')[1].split('/')
+            type, subtype = content_type.split('/')
             self.content_type = self.known_types.get(type)
             self.content_type = self.content_type.get(subtype) if self.content_type else None
+        else:
+            self.content_type = 'plain'
 
     def normalize_raw_request(self):
         "Приводит сырой запрос к стандарту"
