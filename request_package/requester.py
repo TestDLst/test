@@ -65,9 +65,9 @@ class Requester:
         port = self.config['RequestInfo']['port']
 
         if protocol == 'http':
-            connection = client.HTTPConnection(request.host)
+            connection = client.HTTPConnection(request.host, port)
         elif protocol == 'https':
-            connection = client.HTTPSConnection(request.host)
+            connection = client.HTTPSConnection(request.host, port)
         else:
             """Exception"""
             pass
