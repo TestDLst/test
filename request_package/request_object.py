@@ -52,4 +52,3 @@ if __name__ == '__main__':
         raw_request = f.read()
 
     ro = RequestObject(raw_request)
-    print('1')
