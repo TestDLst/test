@@ -11,19 +11,18 @@ class Controller:
         # Объявления
         self.config = config
         self.initial_request = self.get_initial_request()
-        self.marked_request = RequestMarker(self.initial_request, self.config).get_marked_request()
-
+        self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
         # Логика
         # Тест RequestModifier'а
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        print(self.modified_requests[19]._testing_param)
+        print(self.modified_requests[0]._testing_param)
 
         # Тест Requester
-        # self.response_queue = Queue()
-        # requester = Requester(self.modified_requests, self.response_queue, self.config)
-        # requester.wait_completion()
+        self.response_queue = Queue()
+        requester = Requester(self.modified_requests, self.response_queue, self.config)
+        requester.wait_completion()
         # print("end")
 
     def search_hidden_parameters(self):
@@ -35,7 +34,7 @@ class Controller:
         :param payloads: Нагрузки, дополняющие помеченные параметры
         :return: Список объектов RequestObject
         """
-        request_modifier = RequestModifier(self.marked_request, payloads, self.config)
+        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
         return request_modifier.get_modified_requests()
 
     def get_initial_request(self):

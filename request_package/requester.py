@@ -1,10 +1,11 @@
 import http.client as client
-from threading import Thread
 from queue import Queue
+from threading import Thread
 
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
+
     def __init__(self, tasks):
         Thread.__init__(self)
         self.tasks = tasks
@@ -26,6 +27,7 @@ class Worker(Thread):
 
 class ThreadPool:
     """ Pool of threads consuming tasks from a queue """
+
     def __init__(self, num_threads):
         self.tasks = Queue(num_threads)
         for _ in range(num_threads):
@@ -62,19 +64,17 @@ class Requester:
 
     def _send_request(self, request):
         protocol = self.config['RequestInfo']['protocol'].lower()
-        port = self.config['RequestInfo']['port']
+        port = int(self.config['RequestInfo']['port'])
 
         if protocol == 'http':
-            connection = client.HTTPConnection(request.host)
+            connection = client.HTTPConnection(request.host, port)
         elif protocol == 'https':
-            connection = client.HTTPSConnection(request.host)
+            connection = client.HTTPSConnection(request.host, port)
         else:
             """Exception"""
             pass
 
-        headers = dict([i.split(': ') for i in request.headers])
-
-        connection.request(request.method, request.url_path, request.data, headers=headers)
+        connection.request(request.method, request.url_path, request.data, headers=request.headers)
 
         resp = connection.getresponse()
         request.raw_response = resp.read()
@@ -84,4 +84,3 @@ class Requester:
 
     def wait_completion(self):
         self.pool.wait_completion()
-

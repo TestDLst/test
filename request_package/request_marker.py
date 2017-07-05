@@ -2,7 +2,6 @@ import json
 import re
 
 from request_package.json_mark import MyJSONEncoder
-from request_package.request_object import RequestObject
 
 
 class RequestMarker:
@@ -17,7 +16,7 @@ class RequestMarker:
         self.config = config
         self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
 
-        self.excluded_headers = {'Host', 'Accept', 'Accept-Language','Accept-Encoding', 'Connection', 'Content-Type',
+        self.excluded_headers = {'Host', 'Accept', 'Accept-Language', 'Accept-Encoding', 'Connection', 'Content-Type',
                                  'Content-Length'}  # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
@@ -39,13 +38,13 @@ class RequestMarker:
         return self.request_object.raw_request
 
     def _mark_request(self):
-        """Помечает отдельные участки запроса и собирает их вместе в self.request_object.marked_request"""
+        """Помечает отдельные участки запроса и собирает их вместе в self.request_object.marked_raw_request"""
         self._mark_query_string()
         self._mark_headers()
         self._mark_data()
 
-        self.request_object.market_request = '\r\n'.join(
-            [self.request_object.query_string] + self.request_object.headers) + '\r\n\r\n' + self.request_object.data
+        self.request_object.market_request = '\r\n'.join([self.request_object.query_string] + self.request_object.headers_list)\
+                                             + '\r\n\r\n' + self.request_object.data
 
     def _mark_query_string(self):
         """Помечает значения в строке запроса"""
@@ -60,7 +59,7 @@ class RequestMarker:
         """Помечает значения в хидерах"""
         modified_headers = []
 
-        for header in self.request_object.headers:
+        for header in self.request_object.headers_list:
             try:
                 name, value = header.split(': ')
                 self.all_headers.add(name)
@@ -78,13 +77,11 @@ class RequestMarker:
             except ValueError as ve:
                 print('[!] Exception in _mark_headers. Message: {}'.format(ve))
 
-
-
         for header, value in self.extra_headers.items():
             if header not in self.all_headers:
                 modified_headers.append(': '.join([header, self.injection_mark.format(value)]))
 
-        self.request_object.headers = modified_headers
+        self.request_object.headers_list = modified_headers
 
     def _mark_data(self):
         """Помечает параметры в данных"""
@@ -148,4 +145,5 @@ class RequestMarker:
         :param string: Строка, в которой пустые параметры ищутся
         :return: Измененная строка string
         """
-        return re.sub('=(&|$)', lambda x: '=' + self.injection_mark.format('') + ('&' if '&' in x.group() else ''), string)
+        return re.sub('=(&|$)', lambda x: '=' + self.injection_mark.format('') + ('&' if '&' in x.group() else ''),
+                      string)
