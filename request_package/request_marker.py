@@ -38,7 +38,7 @@ class RequestMarker:
         return self.request_object.raw_request
 
     def _mark_request(self):
-        """Помечает отдельные участки запроса и собирает их вместе в self.request_object.market_request"""
+        """Помечает отдельные участки запроса и собирает их вместе в self.request_object.marked_request"""
         self._mark_query_string()
         self._mark_headers()
         self._mark_data()
