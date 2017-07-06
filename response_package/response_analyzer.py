@@ -5,7 +5,7 @@ class StatisticObject:
         self.length = len(self.raw_response)
 
     def print_info(self):
-        print("%s, %d" % (self.param, self.length))
+        print("%d, %s" % (self.length, self.param))
 
 
 class Analyzer:
