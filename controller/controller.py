@@ -4,9 +4,9 @@ from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
 from request_package.requester import Requester
-from response_package.response_analyzer import Analyzer
+from core.analyzer import Analyzer
 
-
+# TODO: добавить в Requester метку end в конец очереди после завершения запросов
 class Controller:
     def __init__(self, config):
         # Объявления
