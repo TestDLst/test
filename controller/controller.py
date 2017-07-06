@@ -19,7 +19,7 @@ class Controller:
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
         # print(self.modified_requests[0]._testing_param)
-        print(self.marked_raw_request)
+
         # Тест Requester
         self.response_queue = Queue()
         requester = Requester(self.modified_requests, self.response_queue, self.config)

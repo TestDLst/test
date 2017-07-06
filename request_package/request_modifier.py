@@ -92,10 +92,10 @@ class RequestModifier:
 
         for payload in self.payloads:
             modified_value = match.string[start:end] + payload
-            # modified_query_string = match.string[:start] + modified_value + match.string[end:]
-            modified_query_string = self.marked_request.query_string
-            modified_raw_request = modified_query_string + '\r\n' + '\r\n'.join(self.marked_request.headers_list) \
-                                   + '\r\n\r\n' + self.marked_request.data
+            modified_data = match.string[:start] + modified_value + match.string[end:]
+            # modified_query_string = self.marked_request.query_string
+            modified_raw_request = self.marked_request.query_string + '\r\n' + '\r\n'.join(self.marked_request.headers_list) \
+                                   + '\r\n\r\n' + modified_data
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
 
