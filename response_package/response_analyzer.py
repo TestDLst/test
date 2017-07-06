@@ -1,6 +1,11 @@
 class StatisticObject:
-    def __init__(self):
-        pass
+    def __init__(self, response):
+        self.raw_response = response.raw_response
+        self.param = response._testing_param
+        self.length = len(self.raw_response)
+
+    def print_info(self):
+        print("%s, %d" % (self.param, self.length))
 
 
 class Analyzer:
@@ -12,3 +17,7 @@ class Analyzer:
 
     def _analyze_response(self, response):
         self.results.append(StatisticObject(response))
+
+    def print_info(self):
+        for statistic_obj in self.results:
+            statistic_obj.print_info()
