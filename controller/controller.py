@@ -20,9 +20,9 @@ class Controller:
         print(self.modified_requests[0]._testing_param)
 
         # Тест Requester
-        self.response_queue = Queue()
-        requester = Requester(self.modified_requests, self.response_queue, self.config)
-        requester.wait_completion()
+        # self.response_queue = Queue()
+        # requester = Requester(self.modified_requests, self.response_queue, self.config)
+        # requester.wait_completion()
         # print("end")
 
     def search_hidden_parameters(self):
