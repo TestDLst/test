@@ -1,4 +1,6 @@
 import http.client as client
+import socks
+from urllib.parse import urlparse
 from queue import Queue
 from threading import Thread
 
@@ -63,16 +65,15 @@ class Requester:
         self.response_queue.put(response)
 
     def _send_request(self, request):
-        protocol = self.config['RequestInfo']['protocol'].lower()
+        scheme = self.config['RequestInfo']['scheme'].lower()
         port = int(self.config['RequestInfo']['port'])
 
-        if protocol == 'http':
+        if scheme == 'http':
             connection = client.HTTPConnection(request.host, port)
-        elif protocol == 'https':
+        elif scheme == 'https':
             connection = client.HTTPSConnection(request.host, port)
         else:
-            """Exception"""
-            pass
+            raise Exception('Протокол {} не поддерживается'.format(scheme))
 
         connection.request(request.method, request.url_path, request.data, headers=request.headers)
 

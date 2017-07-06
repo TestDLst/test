@@ -4,6 +4,7 @@ import sys
 import os
 import re
 import codecs
+from urllib.parse import urlparse
 
 from controller.controller import Controller
 
@@ -41,6 +42,8 @@ class Main:
         main_group.add_argument('-u', '--url', dest='url', help='Адрес приложения (https://example.com:83)')
         main_group.add_argument('-f', '--file', dest='file', help='Файл с запросом')
         main_group.add_argument('-t', '--threads', dest='threads', type=int, help='Количество потоков')
+        main_group.add_argument('--proxy', dest='proxy',
+                                help='Адрес прокси-сервера (http://127.0.0.1:8080, socks5://127.0.0.1:9050, ...)')
 
         config_group = self.parser.add_argument_group('Config')
         config_group.add_argument('--update', dest='update_config', action='store_true',
@@ -86,14 +89,25 @@ class Main:
             self.config['Main']['threads'] = str(self.arguments.threads)
 
         # Парсим --url
-        protocol = self.arguments.url.split('://')[0] if '://' in self.arguments.url \
-            else self.config['RequestInfo']['protocol']
-        port = re.search(':(\d+)\/?', self.arguments.url)
-        port = port.group(1) if port else self.config['RequestInfo']['port']
+        url = urlparse(self.arguments.url)
+        url_scheme = url.scheme if url.scheme else self.config['RequestInfo']['scheme']
+        url_port = url.port if url.port else self.config['RequestInfo']['port']
+
+        # Парсим --proxy
+        proxy = urlparse(self.arguments.proxy)
+        proxy_scheme = proxy.scheme
+        proxy_host = proxy.hostname
+        proxy_port = str(proxy.port)
 
         # Распихиваем --url по конфигу
-        self.config['RequestInfo']['protocol'] = protocol
-        self.config['RequestInfo']['port'] = port
+        self.config['RequestInfo']['scheme'] = url_scheme
+        self.config['RequestInfo']['port'] = url_port
+
+        # Распихиваем --proxy
+        self.config['Proxy']['scheme'] = proxy_scheme
+        self.config['Proxy']['host'] = proxy_host
+        self.config['Proxy']['port'] = proxy_port
+
         # Указываем путь до main.py
         self.config['Program']['script_path'] = self.script_path
 
@@ -116,6 +130,7 @@ class Main:
         self.arguments.url = 'http://monitoring.kantiana.ru/'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
+        self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 
