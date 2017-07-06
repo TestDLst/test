@@ -17,3 +17,7 @@ class Analyzer:
 
     def _analyze_response(self, response):
         self.results.append(StatisticObject(response))
+
+    def print_info(self):
+        for statistic_obj in self.results:
+            statistic_obj.print_info()
