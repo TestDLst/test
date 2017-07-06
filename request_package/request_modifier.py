@@ -141,7 +141,7 @@ class RequestModifier:
         end += 1 if match.string[end] == '"' else 0
         return start, end + payload_len
 
-    # TODO: незабыть про аттрибуты (отельно для аттрибутов с = и отдельно теги)
+    # TODO: незабыть про аттрибуты (отдельно для аттрибутов с = и отдельно теги)
     def _feed_xml_data(self, match):
-
+        attr_regexp = '.+?={mark}.+?{mark}'
         pass
