@@ -1,7 +1,6 @@
 import re
-
 from request_package.request_object import RequestObject
-
+from urllib.parse import quote
 
 class RequestModifier:
     def __init__(self, marked_request, payloads, config):
@@ -41,7 +40,7 @@ class RequestModifier:
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
 
         for payload in self.payloads:
-            modified_value = match.string[start:end] + payload
+            modified_value = quote((match.string[start:end] + payload).replace(self.injection_mark, ''))
             modified_query_string = match.string[:start] + modified_value + match.string[end:]
             modified_raw_request = '\r\n'.join([modified_query_string] + self.marked_request.headers_list) \
                                    + '\r\n\r\n' + self.marked_request.data

@@ -119,5 +119,7 @@ class Requester:
 
         self.add_response((request, request_time))
 
+    def get_standard_response(self):
+
     def wait_completion(self):
         self.pool.wait_completion()

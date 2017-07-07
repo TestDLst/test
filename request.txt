@@ -1,9 +1,11 @@
-GET /Sauga-saugos-sprendimai/50-slaptazodziu-per-valanda-kaip-galima-sukompromituoti-verslo-tinkla-su-20-JAV-doleriu-kainuojanciu.im?id=360917&f=c HTTP/1.1
+GET /lt/SearchArticles?searchText=&Category=1 HTTP/1.1
 Host: www.penki.lt
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
 Accept-Encoding: gzip, deflate
+Referer: http://www.penki.lt/Sauga-saugos-sprendimai/50-slaptazodziu-per-valanda-kaip-galima-sukompromituoti-verslo-tinkla-su-20-JAV-doleriu-kainuojanciu.im?id=360917&f=c
 Cookie: _ga=GA1.2.1133708854.1499447901; _gid=GA1.2.1083750373.1499447901; __gads=ID=508e1f1c43ed720e:T=1499447902:S=ALNI_MZOvm1It0hubHRBkIN0rGMVkiTx5Q; ASP.NET_SessionId=cuyor3tv0s4r00pagmgykubi; _gat=1
 Connection: close
+Cache-Control: max-age=0
 
