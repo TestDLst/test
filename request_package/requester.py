@@ -114,12 +114,14 @@ class Requester:
         resp = connection.getresponse()
         request_time = time() - request_time
 
-        request.raw_response = resp.read()
+        request.raw_response = resp.read().decode()
         connection.close()
 
         self.add_response((request, request_time))
 
-    def get_standard_response(self):
+    def get_standard_response(self, request):
+        self._send_request(request)
+        return self.response_queue.get()
 
     def wait_completion(self):
         self.pool.wait_completion()

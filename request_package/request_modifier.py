@@ -47,7 +47,7 @@ class RequestModifier:
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
 
-            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+            self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
 
     def _modify_headers(self):
         marked_values_regexp = '{mark}.+?{mark}'.format(mark=self.injection_mark)
@@ -68,7 +68,7 @@ class RequestModifier:
                                                + '\r\n\r\n' + self.marked_request.data
                         modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
                         testing_param = 'Header: {}, Value: {}'.format(header.split(': ')[0], modified_value)
-                        self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+                        self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
 
     def _modify_data(self):
         if self.marked_request.content_type == 'plain':
@@ -100,7 +100,7 @@ class RequestModifier:
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
 
-            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+            self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
 
     def _feed_json_data(self, match):
         start, end = match.regs[0]
@@ -113,7 +113,7 @@ class RequestModifier:
                                    + '\r\n\r\n' + modified_data
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
 
-            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+            self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
 
     def _get_testing_json_param_pos(self, match, payload_len):
         start, end = match.regs[0]
@@ -154,7 +154,7 @@ class RequestModifier:
                                    + '\r\n\r\n' + modified_data
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
 
-            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+            self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
 
     def _get_testing_xml_param_pos(self, match, payload_len):
         start, end = match.regs[0]
