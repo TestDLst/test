@@ -15,7 +15,7 @@ class Controller:
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
-        analyzer = Analyzer(self.marked_raw_request)
+        analyzer = Analyzer(self.marked_raw_request, self.config)
 
         # # Логика
         # # Тест RequestModifier'а
