@@ -16,16 +16,16 @@ class Controller:
 
         analyzer = Analyzer(self.marked_raw_request, self.config)
 
-        # Тест Requester
-        self.response_queue = Queue()
-        requester = Requester(self.modified_requests, self.response_queue, self.config)
-        requester.run()
-        while requester.is_running():
-            pass
-        # Тест Analyzer
-        analyzer = Analyzer(self.response_queue)
-        analyzer.print_info()
-        print("end")
+        # # Тест Requester
+        # self.response_queue = Queue()
+        # requester = Requester(self.modified_requests, self.response_queue, self.config)
+        # requester.run()
+        # while requester.is_running():
+        #     pass
+        # # Тест Analyzer
+        # analyzer = Analyzer(self.response_queue)
+        # analyzer.print_info()
+        # print("end")
 
     def search_hidden_parameters(self):
         pass
