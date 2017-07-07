@@ -6,7 +6,6 @@ from request_package.requester import Requester
 
 class StatisticObject:
     def __init__(self, response):
-        a = response
         self.standard_raw_response = ''
         self.standard_content_length = 0
         self.standard_row_length = 0
@@ -23,6 +22,7 @@ class Analyzer:
     def __init__(self, marked_raw_request, config):
         self.config = config
         self.marked_raw_request = marked_raw_request
+        self.init_statistic_obj = None
 
     def get_modified_requests(self, payloads):
         """ Возвращает список модифицированных запросов
@@ -31,7 +31,8 @@ class Analyzer:
         :return: Список объектов RequestObject
         """
         request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
-        return request_modifier.get_modified_requests()
+        a = request_modifier.get_modified_requests()
+        return a
 
     def get_payloads(self, payload_path):
         """
@@ -42,3 +43,9 @@ class Analyzer:
         with open(self.config['Program']['script_path'] + '/payloads' + payload_path) as f:
             payloads = f.read().split('\n')
         return payloads
+
+    def get_init_statistic_obj(self):
+        raise Exception('Не реализовано')
+
+    def analyze(self):
+        raise Exception('Не реализовано')

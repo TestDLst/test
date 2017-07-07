@@ -1,7 +1,10 @@
 import http.client as client
 from queue import Queue, Empty
 from threading import Thread
+from time import time
+import socks
 
+import requests
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
@@ -60,7 +63,7 @@ class ThreadPool:
         """ Wait for completion of all the tasks in the queue """
         self.tasks.join()
 
-
+# TODO: редирект
 class Requester:
     def __init__(self, requests, response_queue, config):
         self.response_queue = response_queue
@@ -86,19 +89,35 @@ class Requester:
         port = int(self.config['RequestInfo']['port'])
 
         if scheme == 'http':
-            connection = client.HTTPConnection(request.host, port)
+            # connection = client.HTTPConnection(request.host, port)
+            connection = client.HTTPConnection
         elif scheme == 'https':
-            connection = client.HTTPSConnection(request.host, port)
+            connection = client.HTTPSConnection
+            # connection = client.HTTPSConnection(request.host, port)
         else:
             raise Exception('Протокол {} не поддерживается'.format(scheme))
 
-        connection.request(request.method, request.url_path, request.data, headers=request.headers)
+        proxy = self.config['Proxy']['scheme'], self.config['Proxy']['host'], self.config['Proxy']['port']
+        if all(conf for conf in proxy):
+            proxy_scheme, proxy_host, proxy_port = proxy
+            connection = connection(proxy_host, int(proxy_port))
+            connection.set_tunnel(request.host, port)
+            if proxy_scheme.startswith('socks'):
+                connection.sock = socks.socksocket()
+                sock_type = socks.PROXY_TYPE_SOCKS4 if proxy_scheme.startswith('socks4') else socks.PROXY_TYPE_SOCKS5
+                connection.sock.set_proxy(sock_type, proxy_host, int(proxy_port))
+        else:
+            connection = connection(request.host, port)
 
+        request_time = time()
+        connection.request(request.method, request.url_path, request.data, headers=request.headers)
         resp = connection.getresponse()
+        request_time = time() - request_time
+
         request.raw_response = resp.read()
         connection.close()
 
-        self.add_response(request)
+        self.add_response((request, request_time))
 
     def wait_completion(self):
         self.pool.wait_completion()

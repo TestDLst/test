@@ -78,11 +78,13 @@ class RequestModifier:
         elif self.marked_request.content_type == 'json':
             pattern = '{mark}.+?{mark}'.format(mark=self.injection_mark)
             func = self._feed_json_data
+        # TODO: обсудить мораторий на использование request_modifier в xml запросах
         elif self.marked_request.content_type == 'xml':
+            return None
             pattern = '{mark}.+?{mark}'.format(mark=self.injection_mark)
             func = self._feed_xml_data
         else:
-            exit()
+            raise Exception('Exception in _modify_data request_modifier.py')
 
         re.sub(pattern, func, self.marked_request.data)
 

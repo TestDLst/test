@@ -11,13 +11,17 @@ class SqlAnalyzer(Analyzer):
 
         self.sql_payloads = self.get_payloads('/fuzzing/sql.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads)
-
         self.response_queue = Queue()
+        try:
+            self.analyze()
+        except Exception as e:
+            print(e)
+
+    def analyze(self):
         requester = Requester(self.modified_requests, self.response_queue, self.config)
         requester.run()
-
         while requester.is_running():
-            item = self.response_queue.get()
-            print(item)
+            request_obj, request_time = self.response_queue.get()
+            print(request_obj._testing_param, request_time, len(request_obj.raw_response))
 
         # requester.wait_completion()

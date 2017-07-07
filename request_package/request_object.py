@@ -18,7 +18,8 @@ class RequestObject:
         self.data = ''
         self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
                             'application': {'atom+xml': 'xml', 'json': 'json', 'soap+xml': 'xml', 'xhtml+xml': 'xml',
-                                            'xml-dtd': 'xml', 'xop+xml': 'xml', 'xml': 'xml'}}
+                                            'xml-dtd': 'xml', 'xop+xml': 'xml', 'xml': 'xml',
+                                            'x-www-form-urlencoded': 'plain'}}
 
         self.normalize_raw_request()
         self._parse_request(self.raw_request)

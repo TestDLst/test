@@ -93,20 +93,21 @@ class Main:
         url_scheme = url.scheme if url.scheme else self.config['RequestInfo']['scheme']
         url_port = url.port if url.port else self.config['RequestInfo']['port']
 
-        # Парсим --proxy
-        proxy = urlparse(self.arguments.proxy)
-        proxy_scheme = proxy.scheme
-        proxy_host = proxy.hostname
-        proxy_port = str(proxy.port)
-
         # Распихиваем --url по конфигу
         self.config['RequestInfo']['scheme'] = url_scheme
         self.config['RequestInfo']['port'] = url_port
 
-        # Распихиваем --proxy
-        self.config['Proxy']['scheme'] = proxy_scheme
-        self.config['Proxy']['host'] = proxy_host
-        self.config['Proxy']['port'] = proxy_port
+        # Парсим --proxy
+        if self.arguments.proxy:
+            proxy = urlparse(self.arguments.proxy)
+            proxy_scheme = proxy.scheme
+            proxy_host = proxy.hostname
+            proxy_port = str(proxy.port)
+
+            # Распихиваем --proxy
+            self.config['Proxy']['scheme'] = proxy_scheme
+            self.config['Proxy']['host'] = proxy_host
+            self.config['Proxy']['port'] = proxy_port
 
         # Указываем путь до main.py
         self.config['Program']['script_path'] = self.script_path
@@ -127,7 +128,7 @@ class Main:
             self.config.write(config_file)
 
     def _test(self):
-        self.arguments.url = 'http://monitoring.kantiana.ru/'
+        self.arguments.url = 'http://www.penki.lt/lt/Search?searchText=*&Category=0&BeginDate=&EndDate='
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
         self.arguments.proxy = 'http://127.0.0.1:8080'

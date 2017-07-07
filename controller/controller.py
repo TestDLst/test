@@ -10,19 +10,8 @@ class Controller:
         self.config = config
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
-
         analyzer = SqlAnalyzer(self.marked_raw_request, self.config)
 
-        # # Тест Requester
-        # self.response_queue = Queue()
-        # requester = Requester(self.modified_requests, self.response_queue, self.config)
-        # requester.run()
-        # while requester.is_running():
-        #     pass
-        # # Тест Analyzer
-        # analyzer = Analyzer(self.response_queue)
-        # analyzer.print_info()
-        # print("end")
 
     def get_initial_request(self):
         """ Возвращает инициализирующий запрос
