@@ -18,14 +18,13 @@ class Controller:
         # Тест RequestModifier'а
         meta_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(meta_payloads)
-        # print(self.modified_requests[0]._testing_param)
-        # exit()
+
         # Тест Requester
         self.response_queue = Queue()
         requester = Requester(self.modified_requests, self.response_queue, self.config)
-        requester.wait_completion()
-        # print("end")
-
+        requester.run()
+        while requester.is_running():
+            pass
         # Тест Analyzer
         analyzer = Analyzer(self.response_queue)
         analyzer.print_info()
