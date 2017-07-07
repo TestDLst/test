@@ -32,5 +32,5 @@ class Analyzer:
 
 
 class SqlAnalyzer(Analyzer):
-    def __init__(self):
-        pass
+    def __init__(self, request):
+        self.request = request
