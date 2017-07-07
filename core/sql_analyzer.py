@@ -1,3 +1,5 @@
+from queue import Queue
+
 from core.analyzer import Analyzer
 from request_package.requester import Requester
 
