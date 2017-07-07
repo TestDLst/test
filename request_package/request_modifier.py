@@ -79,7 +79,7 @@ class RequestModifier:
             pattern = '{mark}.+?{mark}'.format(mark=self.injection_mark)
             func = self._feed_json_data
         elif self.marked_request.content_type == 'xml':
-            pattern = '<.+?>{mark}.+?{mark}<\/.+?>'
+            pattern = '{mark}.+?{mark}'.format(mark=self.injection_mark)
             func = self._feed_xml_data
         else:
             exit()
@@ -144,5 +144,43 @@ class RequestModifier:
 
     # TODO: незабыть про аттрибуты (отдельно для аттрибутов с = и отдельно теги)
     def _feed_xml_data(self, match):
-        attr_regexp = '.+?={mark}.+?{mark}'
-        pass
+        start, end = match.regs[0]
+        for payload in self.payloads:
+            _start, _end = self._get_testing_xml_param_pos(match, len(payload))
+            modified_value = match.string[start:end] + payload
+            modified_data = match.string[:start] + modified_value + match.string[end:]
+            testing_param = modified_data[_start:_end].replace(self.injection_mark, '')
+            modified_raw_request = '\r\n'.join([self.marked_request.query_string] + self.marked_request.headers_list) \
+                                   + '\r\n\r\n' + modified_data
+            modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
+
+            self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
+
+
+    def _get_testing_xml_param_pos(self, match, payload_len):
+        start, end = match.regs[0]
+        if match.string[start-1] == '>':
+            start -= 2
+            while True:
+                if match.string[start] == '<':
+                    break
+                start -= 1
+            end += 1
+            while True:
+                if match.string[end] == '>' and match.string[end-1] != '\\':
+                    end += 1
+                    break
+                end +=1
+        else:
+            start -= 1
+            while True:
+                if match.string[start] in ['\r','\n','\t','\f',' ']:
+                    start += 1
+                    break
+                start -= 1
+            end += 1
+            while True:
+                if match.string[end] in ['\r','\n','\t','\f',' ', '>']:
+                    break
+                end += 1
+        return start, end+payload_len
