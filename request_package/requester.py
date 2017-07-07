@@ -1,6 +1,5 @@
 import http.client as client
-from queue import Queue
-from queue import Empty
+from queue import Queue, Empty
 from threading import Thread
 
 

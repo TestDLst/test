@@ -1,6 +1,6 @@
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
-from core.analyzer import Analyzer
+from core.sql_analyzer import SqlAnalyzer
 
 
 # TODO: добавить в Requester метку end в конец очереди после завершения запросов
@@ -11,7 +11,7 @@ class Controller:
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
-        analyzer = Analyzer(self.marked_raw_request, self.config)
+        analyzer = SqlAnalyzer(self.marked_raw_request, self.config)
 
         # # Тест Requester
         # self.response_queue = Queue()
@@ -23,9 +23,6 @@ class Controller:
         # analyzer = Analyzer(self.response_queue)
         # analyzer.print_info()
         # print("end")
-
-    def search_hidden_parameters(self):
-        pass
 
     def get_initial_request(self):
         """ Возвращает инициализирующий запрос

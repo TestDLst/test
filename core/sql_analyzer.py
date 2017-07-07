@@ -14,4 +14,10 @@ class SqlAnalyzer(Analyzer):
 
         self.response_queue = Queue()
         requester = Requester(self.modified_requests, self.response_queue, self.config)
-        requester.wait_completion()
+        requester.run()
+
+        while requester.is_running():
+            item = self.response_queue.get()
+            print(item)
+
+        # requester.wait_completion()
