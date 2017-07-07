@@ -114,12 +114,11 @@ class RequestMarker:
 
     def _mark_data_xml(self):
         """Помечаются данные, представленные xml"""
-        # some kostyl
         attr_regexp = '''(?<!version)(?<!encoding)=['"](.+?)['"]'''
         item_regexp = '''<[^\/]+?>([^\<\>]+?)<\/.+?>'''
         data = self.request_object.data
 
-        data = self._mark_by_regexp(data, attr_regexp,group=1)
+        data = self._mark_by_regexp(data, attr_regexp, group=1)
         data = self._mark_by_regexp(data, item_regexp)
         self.request_object.data = data
 

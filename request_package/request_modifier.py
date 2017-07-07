@@ -142,7 +142,6 @@ class RequestModifier:
         end += 1 if match.string[end] == '"' else 0
         return start, end + payload_len
 
-    # TODO: незабыть про аттрибуты (отдельно для аттрибутов с = и отдельно теги)
     def _feed_xml_data(self, match):
         start, end = match.regs[0]
         for payload in self.payloads:
@@ -155,7 +154,6 @@ class RequestModifier:
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
 
             self.modified_requests.append(RequestObject(modified_raw_request, _testing_param=testing_param))
-
 
     def _get_testing_xml_param_pos(self, match, payload_len):
         start, end = match.regs[0]

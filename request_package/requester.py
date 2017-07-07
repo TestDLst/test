@@ -1,7 +1,6 @@
 import http.client as client
-import socks
-from urllib.parse import urlparse
 from queue import Queue
+from queue import Empty
 from threading import Thread
 
 
@@ -12,11 +11,15 @@ class Worker(Thread):
         Thread.__init__(self)
         self.tasks = tasks
         self.daemon = True
-        self.start()
 
     def run(self):
         while True:
-            func, args, kargs = self.tasks.get()
+            try:
+                func, args, kargs = self.tasks.get(block=False)
+            except Empty as e:
+                # Если очередь tasks пустая
+                break
+
             try:
                 func(*args, **kargs)
             except Exception as e:
@@ -31,9 +34,10 @@ class ThreadPool:
     """ Pool of threads consuming tasks from a queue """
 
     def __init__(self, num_threads):
-        self.tasks = Queue(num_threads)
+        self.tasks = Queue()
+        self.workers = []
         for _ in range(num_threads):
-            Worker(self.tasks)
+            self.workers.append(Worker(self.tasks))
 
     def add_task(self, func, *args, **kargs):
         """ Add a task to the queue """
@@ -43,6 +47,15 @@ class ThreadPool:
         """ Add a list of tasks to the queue """
         for args in args_list:
             self.add_task(func, args)
+
+    def run(self):
+        for worker in self.workers:
+            worker.start()
+
+    def is_running(self):
+        if any([worker.is_alive() for worker in self.workers]):
+            return True
+        return False
 
     def wait_completion(self):
         """ Wait for completion of all the tasks in the queue """
@@ -57,8 +70,13 @@ class Requester:
 
         self.num_threads = int(self.config['Main']['threads'])
         self.pool = ThreadPool(self.num_threads)
-
         self.pool.map(self._send_request, self.requests)
+
+    def run(self):
+        self.pool.run()
+
+    def is_running(self):
+        return self.pool.is_running()
 
     def add_response(self, response):
         """ Add a response to the response_queue """

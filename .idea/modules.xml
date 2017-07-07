@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\Noname\Desktop\test\.idea\awf.iml" filepath="C:\Users\Noname\Desktop\test\.idea\awf.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/test.iml" filepath="$PROJECT_DIR$/.idea/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/awf.iml" filepath="$PROJECT_DIR$/.idea/awf.iml" />
     </modules>
   </component>
 </project>
