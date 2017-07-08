@@ -6,5 +6,10 @@ class ResponseObject:
 
         self.request_time = request_time
         self.content_length = len(self.raw_response)
-        self.row_length = 0
+        self.row_length = len(self.raw_response.splitlines())
 
+    def rebuild(self, raw_response):
+        self.raw_response = raw_response
+
+        self.content_length = len(raw_response)
+        self.row_length = len(self.raw_response.splitlines())
