@@ -2,9 +2,11 @@ import http.client as client
 from queue import Queue, Empty
 from threading import Thread
 from time import time
+
 import socks
 
-import requests
+from request_package.response_object import ResponseObject
+
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
@@ -63,6 +65,7 @@ class ThreadPool:
         """ Wait for completion of all the tasks in the queue """
         self.tasks.join()
 
+
 # TODO: редирект
 class Requester:
     def __init__(self, requests, response_queue, config):
@@ -84,6 +87,7 @@ class Requester:
         """ Add a response to the response_queue """
         self.response_queue.put(response)
 
+    # TODO: хидер Host при отправке через проксю смещается на рандомную позицию, что ломает запрос в бурпе
     def _send_request(self, request):
         scheme = self.config['RequestInfo']['scheme'].lower()
         port = int(self.config['RequestInfo']['port'])
@@ -113,11 +117,12 @@ class Requester:
         connection.request(request.method, request.url_path, request.data, headers=request.headers)
         resp = connection.getresponse()
         request_time = time() - request_time
-
-        request.raw_response = resp.read().decode()
         connection.close()
 
-        self.add_response((request, request_time))
+        response_obj = ResponseObject(raw_response=resp.read(), request_object=request,
+                                      request_time=request_time)
+
+        self.add_response(response_obj)
 
     def get_standard_response(self, request):
         self._send_request(request)

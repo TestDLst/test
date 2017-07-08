@@ -8,15 +8,19 @@ class SqlAnalyzer(Analyzer):
     def __init__(self, marked_raw_request, config):
         Analyzer.__init__(self, marked_raw_request, config)
 
-        self.sql_payloads = self.get_payloads('/fuzzing/sql.txt')
+        self.sql_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads)
+
+        print(self.modified_requests[0].raw_request)
+        self.analyze()
 
     def analyze(self):
         requester = Requester(self.modified_requests, self.response_queue, self.config)
         requester.run()
         while requester.is_running():
-            request_obj, request_time = self.response_queue.get()
-            print(request_obj.testing_param, request_time, len(request_obj.raw_response))
+            response_obj = self.response_queue.get()
+            # print(response_obj.testing_param, response_obj.request_time, response_obj.content_length)
+            print(response_obj.raw_response)
 
     def get_init_statistic_obj(self):
         requester = Requester([self.get_initial_request()], self.response_queue, self.config)
