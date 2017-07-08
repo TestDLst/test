@@ -44,18 +44,29 @@ class SqlAnalyzer(Analyzer):
 
         while requester.is_running() or not resp_queue.empty():
             resp = resp_queue.get()
-            pattern = '.+?{reflected}.+?\n'.format(reflected=self._reflect_payload)
-            re.sub(pattern, self._feed_reflected_rows,resp.raw_response)
+            pattern = '\s+?.+?({reflected}).+?\n'.format(reflected=self._reflect_payload)
+            re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
 
 
     def clean_reflected_rows(self, response_obj):
         raw_response = response_obj.raw_response
         for reflect_pattern in self.reflected_rows:
-            raw_response = re.sub(reflect_pattern, '', raw_response)
-        print(raw_response)
-        
-        response_obj.rebuild(raw_response)
+            try:
+                raw_response = re.sub(reflect_pattern, '', raw_response)
+                response_obj.rebuild(raw_response)
+            except Exception as e:
+                print(reflect_pattern)
+                print(e)
         return response_obj
 
     def _feed_reflected_rows(self, match):
-        self.reflected_rows |= set([match.group(0).replace(self._reflect_payload, '.+?')])
+        start, _ = match.regs[0]
+        stop, _ = match.regs[1]
+        reflect_pattern = match.string[start:stop] + '.+?\n'
+        reflect_pattern = reflect_pattern.replace('"', '\\"') # экранируем двойные кавычки
+        reflect_pattern = reflect_pattern.replace('(', '\\(').replace(')','\\)') # экранируем скобки
+        reflect_pattern = reflect_pattern.replace('[', '\\[').replace(']','\\]') # экранируем скобки
+        reflect_pattern = reflect_pattern.replace('$', '\\$')
+        reflect_pattern = reflect_pattern.replace('^', '\\^')
+
+        self.reflected_rows |= set([reflect_pattern])
