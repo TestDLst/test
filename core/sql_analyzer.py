@@ -7,6 +7,7 @@ from request_package.requester import Requester
 class SqlAnalyzer(Analyzer):
     def __init__(self, marked_raw_request, config):
         Analyzer.__init__(self, marked_raw_request, config)
+        self.standard_response = self.get_standard_response()
 
         self.sql_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads)
@@ -19,5 +20,5 @@ class SqlAnalyzer(Analyzer):
         while requester.is_running():
             response_obj = self.response_queue.get()
             response_obj = self.clean_reflected_rows(response_obj)
-            print(response_obj.testing_param, response_obj.request_time, response_obj.content_length)
-
+            if self.is_interesting_behavior(response_obj):
+                print(response_obj.testing_param, response_obj.content_length, response_obj.row_count, response_obj.request_time)

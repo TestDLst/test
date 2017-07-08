@@ -1,11 +1,10 @@
 import random
 import re
 import string
-
 from queue import Queue
 
-from request_package.request_object import RequestObject
 from request_package.request_modifier import RequestModifier
+from request_package.request_object import RequestObject
 from request_package.requester import Requester
 
 
@@ -17,6 +16,7 @@ class Analyzer:
 
         self.init_request_obj = self.get_initial_request()
         self.response_queue = Queue()
+        self.standard_response = self.get_standard_response()
 
         self.reflected_patterns = set()
         self._reflect_payload = ''
@@ -63,6 +63,13 @@ class Analyzer:
         self.time_delta = (standard_response.request_time, standard_response.request_time)
         return standard_response
 
+    def is_interesting_behavior(self, response_obj):
+        if not self.time_delta[0] <= response_obj.request_time <= self.time_delta[1] \
+                or response_obj.content_length != self.standard_response.content_length \
+                or response_obj.row_count != self.standard_response.row_count:
+            return True
+        return False
+
     def analyze(self):
         raise Exception('Не реализовано')
 
@@ -97,7 +104,7 @@ class Analyzer:
         self._reflect_payload = ''.join([random.choice(string.ascii_letters) for i in range(6)])
         requests = self.get_modified_requests([self._reflect_payload])
 
-        requester = Requester(requests,resp_queue,self.config)
+        requester = Requester(requests, resp_queue, self.config)
         requester.run()
 
         while requester.is_running() or not resp_queue.empty():
@@ -110,9 +117,9 @@ class Analyzer:
         start, _ = match.regs[0]
         stop, _ = match.regs[1]
         reflect_pattern = match.string[start:stop] + '.+?\n'
-        reflect_pattern = reflect_pattern.replace('"', '\\"') # экранируем двойные кавычки
-        reflect_pattern = reflect_pattern.replace('(', '\\(').replace(')','\\)') # экранируем скобки
-        reflect_pattern = reflect_pattern.replace('[', '\\[').replace(']','\\]') # экранируем скобки
+        reflect_pattern = reflect_pattern.replace('"', '\\"')  # экранируем двойные кавычки
+        reflect_pattern = reflect_pattern.replace('(', '\\(').replace(')', '\\)')  # экранируем скобки
+        reflect_pattern = reflect_pattern.replace('[', '\\[').replace(']', '\\]')  # экранируем скобки
         reflect_pattern = reflect_pattern.replace('$', '\\$')
         reflect_pattern = reflect_pattern.replace('^', '\\^')
 
