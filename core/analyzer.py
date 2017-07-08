@@ -14,6 +14,8 @@ class Analyzer:
         self.init_request_obj = self.get_initial_request()
         self.response_queue = Queue()
 
+        self.reflected_rows = set()
+
     def get_modified_requests(self, payloads):
         """ Возвращает список модифицированных запросов
 
