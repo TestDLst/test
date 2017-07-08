@@ -113,6 +113,9 @@ class Requester:
         else:
             connection = connection(request.host, port)
 
+        # headers = request.headers
+        # del headers['Host']
+
         request_time = time()
         connection.request(request.method, request.url_path, request.data, headers=request.headers)
         resp = connection.getresponse()

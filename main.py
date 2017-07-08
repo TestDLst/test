@@ -131,7 +131,7 @@ class Main:
         self.arguments.url = 'http://www.penki.lt/lt/Search?searchText=*&Category=0&BeginDate=&EndDate='
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
-        # self.arguments.proxy = 'http://127.0.0.1:8080'
+        self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 

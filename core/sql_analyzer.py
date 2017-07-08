@@ -11,8 +11,7 @@ class SqlAnalyzer(Analyzer):
         self.sql_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads)
 
-        print(self.modified_requests[0].raw_request)
-        self.analyze()
+        # self.analyze()
 
     def analyze(self):
         requester = Requester(self.modified_requests, self.response_queue, self.config)
@@ -22,9 +21,9 @@ class SqlAnalyzer(Analyzer):
             # print(response_obj.testing_param, response_obj.request_time, response_obj.content_length)
             print(response_obj.raw_response)
 
-    def get_init_statistic_obj(self):
+    def get_standard_response(self):
         requester = Requester([self.get_initial_request()], self.response_queue, self.config)
-        standard_response = requester.get_standard_response(self.request_obj)
+        standard_response = requester.get_standard_response(self.init_request_obj)
         return standard_response
 
     # requester.wait_completion()

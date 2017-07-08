@@ -4,23 +4,14 @@ from request_package.request_object import RequestObject
 from request_package.request_modifier import RequestModifier
 from request_package.requester import Requester
 
-
-class StatisticObject:
-    def __init__(self, response):
-        self.raw_response = response.raw_response
-        self.content_length = len(self.raw_response)
-        self.row_length = 0
-        self.request_time = 0
-
-
 # TODO: encode пейлоадов
-# TODO: подумать над судьбой StatisticsObject и ResponseObject (StatisticsObject -> ResponseObject)
+# TODO: Проверять рефлексию параметров в странице
 class Analyzer:
     def __init__(self, marked_raw_request, config):
         self.config = config
         self.marked_raw_request = marked_raw_request
 
-        self.request_obj = self.get_initial_request()
+        self.init_request_obj = self.get_initial_request()
         self.response_queue = Queue()
 
     def get_modified_requests(self, payloads):
