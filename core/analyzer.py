@@ -11,16 +11,20 @@ from request_package.requester import Requester
 # TODO: encode пейлоадов
 class Analyzer:
     def __init__(self, marked_raw_request, config):
+        self.CONTENT_LENGTH = 1
+        self.ROW_COUNT = 2
+        self.REQUEST_TIME = 4
+
         self.config = config
         self.marked_raw_request = marked_raw_request
-
-        self.init_request_obj = self.get_initial_request()
-        self.response_queue = Queue()
-        self.standard_response = self.get_standard_response()
 
         self.reflected_patterns = set()
         self._reflect_payload = ''
         self.time_delta = (None, None)
+
+        self.init_request_obj = self.get_initial_request()
+        self.response_queue = Queue()
+        self.standard_response = self.get_standard_response()
 
     def get_modified_requests(self, payloads):
         """ Возвращает список модифицированных запросов
@@ -58,15 +62,25 @@ class Analyzer:
         инициализирует переменнуж self.time_delta. Является необходимой частью работы анализера.
         :return: Объект ResponseObject
         """
+        print('[!] Получение стандартного ответа')
         requester = Requester([self.get_initial_request()], self.response_queue, self.config)
         standard_response = requester.get_standard_response(self.init_request_obj)
         self.time_delta = (standard_response.request_time, standard_response.request_time)
         return standard_response
 
-    def is_interesting_behavior(self, response_obj):
-        if not self.time_delta[0] <= response_obj.request_time <= self.time_delta[1] \
-                or response_obj.content_length != self.standard_response.content_length \
-                or response_obj.row_count != self.standard_response.row_count:
+    def is_interesting_behavior(self, response_obj, flags=7):
+        """
+
+        :param response_obj:
+        :param flags: Число. 1 - учитывать длину контента, 2 - учитывать кол-во строк, 4 - учитывать время запроса.
+        :return:
+        """
+
+        if flags & self.CONTENT_LENGTH and response_obj.content_length != self.standard_response.content_length:
+            return True
+        if flags & self.ROW_COUNT and response_obj.row_count != self.standard_response.row_count:
+            return True
+        if flags & self.REQUEST_TIME and not self.time_delta[0] <= response_obj.request_time <= self.time_delta[1]:
             return True
         return False
 
@@ -106,7 +120,7 @@ class Analyzer:
 
         requester = Requester(requests, resp_queue, self.config)
         requester.run()
-
+        print('[!] Определение рефлексирующих паттернов')
         while requester.is_running() or not resp_queue.empty():
             resp = resp_queue.get()
             pattern = '\s+?.+?({reflected}).+?\n'.format(reflected=self._reflect_payload)
