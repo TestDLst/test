@@ -1,3 +1,4 @@
+import difflib
 from queue import Queue
 
 from core.analyzer import Analyzer
@@ -11,6 +12,7 @@ class SqlAnalyzer(Analyzer):
         self.sql_payloads = self.get_payloads('/fuzzing/test.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads)
 
+        self.detect_reflected_params()
         # self.analyze()
 
     def analyze(self):
@@ -27,3 +29,27 @@ class SqlAnalyzer(Analyzer):
         return standard_response
 
     # requester.wait_completion()
+
+    # TODO: удалять строки из ответов, которые изменили внутри свое значение
+    def detect_reflected_params(self):
+        payloads = self.get_payloads('/fuzzing/test.txt')
+        requests = self.get_modified_requests(payloads)
+        print(len(requests))
+        resp_queue = Queue()
+
+        standard_response = self.get_standard_response()
+
+        requester = Requester(requests,resp_queue,self.config)
+        requester.run()
+        i=0
+        differ = difflib.Differ()
+
+        while requester.is_running() or not resp_queue.empty():
+            resp = resp_queue.get()
+            i += 1
+
+            result = '\n'.join(list(differ.compare(standard_response.raw_response.splitlines(), resp.raw_response.splitlines())))
+
+            with open(self.config['Program']['script_path'] + '/diffs/' + str(i) + '.html', 'wb') as f:
+                f.write(result.encode())
+            print(i)

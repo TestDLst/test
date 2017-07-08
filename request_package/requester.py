@@ -93,11 +93,9 @@ class Requester:
         port = int(self.config['RequestInfo']['port'])
 
         if scheme == 'http':
-            # connection = client.HTTPConnection(request.host, port)
             connection = client.HTTPConnection
         elif scheme == 'https':
             connection = client.HTTPSConnection
-            # connection = client.HTTPSConnection(request.host, port)
         else:
             raise Exception('Протокол {} не поддерживается'.format(scheme))
 
@@ -113,16 +111,13 @@ class Requester:
         else:
             connection = connection(request.host, port)
 
-        # headers = request.headers
-        # del headers['Host']
-
         request_time = time()
         connection.request(request.method, request.url_path, request.data, headers=request.headers)
         resp = connection.getresponse()
         request_time = time() - request_time
         connection.close()
 
-        response_obj = ResponseObject(raw_response=resp.read(), request_object=request,
+        response_obj = ResponseObject(raw_response=resp.read().decode(), request_object=request,
                                       request_time=request_time)
 
         self.add_response(response_obj)
