@@ -10,8 +10,9 @@ class Controller:
         self.config = config
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
-        analyzer = SqlAnalyzer(self.marked_raw_request, self.config)
 
+        analyzer = SqlAnalyzer(self.marked_raw_request, self.config)
+        analyzer.analyze()
 
     def get_initial_request(self):
         """ Возвращает инициализирующий запрос

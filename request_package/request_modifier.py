@@ -1,6 +1,8 @@
 import re
-from request_package.request_object import RequestObject
 from urllib.parse import quote
+
+from request_package.request_object import RequestObject
+
 
 class RequestModifier:
     def __init__(self, marked_request, payloads, config):
@@ -10,6 +12,10 @@ class RequestModifier:
         :param payloads: список пейлоадов
         :param config: конфигурационный файл
         """
+        self.QUERY_STRING = 1
+        self.HEADERS = 2
+        self.DATA = 4
+
         self.marked_request = RequestObject(marked_request)
         self.payloads = payloads
         self.config = config
@@ -17,17 +23,25 @@ class RequestModifier:
         self.injection_mark = self.config['Program']['injection_mark']
         self.modified_requests = []
 
-    def get_modified_requests(self):
+    def get_modified_requests(self, flags=7):
         """ Возвращает список измененных запросов
 
+        Модифицирует части начального запроса согласно параметру flags. Для модификации строки запроса используется
+        QUERY_STRING (число 1), для модификации заголовков - HEADERS (число 2), для данных - DATA (число 4). Для комби-
+        нации модификаций используй сумму соответствующих констант.
+
+        :param flags: Число, указывающее, какие части запроса модифицировать
         :return: Список request_object'ов с измененными параметрами
         """
         # модифицируем строку запроса и собираем остальную часть
         # модифицируем хидеры и собираем остальные части
         # модифицируем data и собираем остальные части
-        self._modify_query_string()
-        self._modify_headers()
-        self._modify_data()
+        if flags & self.QUERY_STRING:
+            self._modify_query_string()
+        if flags & self.HEADERS:
+            self._modify_headers()
+        if flags & self.DATA:
+            self._modify_data()
 
         return self.modified_requests
 
@@ -47,7 +61,8 @@ class RequestModifier:
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
 
-            self.modified_requests.append(RequestObject(modified_raw_request, testing_param=testing_param))
+            self.modified_requests.append(
+                RequestObject(modified_raw_request, testing_param=testing_param, payload=payload))
 
     def _modify_headers(self):
         marked_values_regexp = '{mark}.+?{mark}'.format(mark=self.injection_mark)
@@ -95,7 +110,8 @@ class RequestModifier:
             modified_value = match.string[start:end] + payload
             modified_data = match.string[:start] + modified_value + match.string[end:]
             # modified_query_string = self.marked_request.query_string
-            modified_raw_request = self.marked_request.query_string + '\r\n' + '\r\n'.join(self.marked_request.headers_list) \
+            modified_raw_request = self.marked_request.query_string + '\r\n' + '\r\n'.join(
+                self.marked_request.headers_list) \
                                    + '\r\n\r\n' + modified_data
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
             testing_param = param_name + '=' + modified_value.replace(self.injection_mark, '')
@@ -158,7 +174,7 @@ class RequestModifier:
 
     def _get_testing_xml_param_pos(self, match, payload_len):
         start, end = match.regs[0]
-        if match.string[start-1] == '>':
+        if match.string[start - 1] == '>':
             start -= 2
             while True:
                 if match.string[start] == '<':
@@ -166,20 +182,20 @@ class RequestModifier:
                 start -= 1
             end += 1
             while True:
-                if match.string[end] == '>' and match.string[end-1] != '\\':
+                if match.string[end] == '>' and match.string[end - 1] != '\\':
                     end += 1
                     break
-                end +=1
+                end += 1
         else:
             start -= 1
             while True:
-                if match.string[start] in ['\r','\n','\t','\f',' ']:
+                if match.string[start] in ['\r', '\n', '\t', '\f', ' ']:
                     start += 1
                     break
                 start -= 1
             end += 1
             while True:
-                if match.string[end] in ['\r','\n','\t','\f',' ', '>']:
+                if match.string[end] in ['\r', '\n', '\t', '\f', ' ', '>']:
                     break
                 end += 1
-        return start, end+payload_len
+        return start, end + payload_len
