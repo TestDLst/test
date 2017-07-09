@@ -3,7 +3,6 @@ from request_package.request_marker import RequestMarker
 from core.sql_analyzer import SqlAnalyzer
 
 
-# TODO: добавить в Requester метку end в конец очереди после завершения запросов
 class Controller:
     def __init__(self, config):
         # Объявления

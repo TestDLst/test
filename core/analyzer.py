@@ -26,14 +26,19 @@ class Analyzer:
         self.response_queue = Queue()
         self.standard_response = self.get_standard_response()
 
-    def get_modified_requests(self, payloads):
-        """ Возвращает список модифицированных запросов
+    def get_modified_requests(self, payloads, flags=7):
+        """ Возвращает список измененных запросов
 
-        :param payloads: Нагрузки, дополняющие помеченные параметры
+        Модифицирует части начального запроса согласно параметру flags. Для модификации строки запроса используется
+        QUERY_STRING (число 1), для модификации заголовков - HEADERS (число 2), для данных - DATA (число 4). Для комби-
+        нации модификаций используй сумму соответствующих констант.
+        :
+        param payloads: Нагрузки, дополняющие помеченные параметры
+        :param flags: Число, указывающее, какие части запроса модифицировать
         :return: Список объектов RequestObject
         """
         request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
-        a = request_modifier.get_modified_requests()
+        a = request_modifier.get_modified_requests(flags=flags)
         return a
 
     def get_payloads(self, payload_path):
@@ -87,6 +92,17 @@ class Analyzer:
     def analyze(self):
         raise Exception('Не реализовано')
 
+    def print_standard_resp_info(self):
+        print_format = '[!] Информация по стандартному ответу\n\tСтандартная длина контента: {content_length}' \
+                       '\n\tСтандартное количество строк: {row_count}\n\tВременной запрос: {min}/{max}\n'
+        kwargs = {
+            'content_length': self.standard_response.content_length,
+            'row_count': self.standard_response.row_count,
+            'min': self.time_delta[0],
+            'max': self.time_delta[1]
+        }
+        print(print_format.format(**kwargs))
+
     def clean_reflected_rows(self, response_obj):
         """ Удаляет рефлексирующие строки в response_obj по паттернам из self.reflected_patterns
 
@@ -103,6 +119,8 @@ class Analyzer:
                 print(e)
         return response_obj
 
+    # TODO: Добить детект, чтобы вывод был пустой
+    # TODO: Искать вместе с именем параметра
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
 
@@ -120,21 +138,34 @@ class Analyzer:
 
         requester = Requester(requests, resp_queue, self.config)
         requester.run()
+
         print('[!] Определение рефлексирующих паттернов')
         while requester.is_running() or not resp_queue.empty():
             resp = resp_queue.get()
-            pattern = '\s+?.+?({reflected}).+?\n'.format(reflected=self._reflect_payload)
             self.time_delta = (min(resp.request_time, self.time_delta[0]), max(resp.request_time, self.time_delta[1]))
+
+            reflected = self._reflect_payload
+
+            pattern = '\s+?.+?({reflected}).+?\n'.format(reflected=reflected)
             re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
 
     def _feed_reflected_rows(self, match):
         start, _ = match.regs[0]
         stop, _ = match.regs[1]
-        reflect_pattern = match.string[start:stop] + '.+?\n'
-        reflect_pattern = reflect_pattern.replace('"', '\\"')  # экранируем двойные кавычки
-        reflect_pattern = reflect_pattern.replace('(', '\\(').replace(')', '\\)')  # экранируем скобки
-        reflect_pattern = reflect_pattern.replace('[', '\\[').replace(']', '\\]')  # экранируем скобки
-        reflect_pattern = reflect_pattern.replace('$', '\\$')
-        reflect_pattern = reflect_pattern.replace('^', '\\^')
+
+        search_additional = '.+?\n'
+        reflect_pattern = match.string[start:stop] + search_additional
+        reflect_pattern = self._escape_pattern(reflect_pattern[:-len(search_additional)])\
+                          + reflect_pattern[-len(search_additional):]
 
         self.reflected_patterns |= set([reflect_pattern])
+
+    def _escape_pattern(self, pattern):
+        pattern = pattern.replace('"', '\"')  # экранируем двойные кавычки
+        pattern = pattern.replace('(', '\(').replace(')', '\)')  # экранируем скобки
+        pattern = pattern.replace('[', '\[').replace(']', '\]')  # экранируем скобки
+        pattern = pattern.replace('$', '\$')
+        pattern = pattern.replace('^', '\^')
+        pattern = pattern.replace('.', '\.').replace('+', '\+').replace('?', '\?')
+
+        return pattern
