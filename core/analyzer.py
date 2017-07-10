@@ -119,8 +119,6 @@ class Analyzer:
                 print(e)
         return response_obj
 
-    # TODO: Добить детект, чтобы вывод был пустой
-    # TODO: Искать вместе с именем параметра
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
 
