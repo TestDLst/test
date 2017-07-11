@@ -7,7 +7,6 @@ from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.requester import Requester
 
-
 # TODO: encode пейлоадов
 class Analyzer:
     def __init__(self, marked_raw_request, config):
@@ -94,7 +93,7 @@ class Analyzer:
 
     def print_standard_resp_info(self):
         print_format = '[!] Информация по стандартному ответу\n\tСтандартная длина контента: {content_length}' \
-                       '\n\tСтандартное количество строк: {row_count}\n\tВременной запрос: {min}/{max}\n'
+                       '\n\tСтандартное количество строк: {row_count}\n\tВременной интервал: {min}/{max}\n'
         kwargs = {
             'content_length': self.standard_response.content_length,
             'row_count': self.standard_response.row_count,
@@ -112,12 +111,22 @@ class Analyzer:
         raw_response = response_obj.raw_response
         for reflect_pattern in self.reflected_patterns:
             try:
-                raw_response = re.sub(reflect_pattern, '', raw_response)
+                raw_response = re.sub(reflect_pattern, self._cut_non_whitespace, raw_response)
                 response_obj.rebuild(raw_response)
             except Exception as e:
                 print(reflect_pattern)
                 print(e)
         return response_obj
+
+    def _cut_non_whitespace(self, match):
+        start, stop = match.regs[0]
+        whitespace_end = start
+
+        while match.string[whitespace_end] in string.whitespace:
+            whitespace_end += 1
+
+        return match.string[start:whitespace_end]
+
 
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
@@ -144,17 +153,18 @@ class Analyzer:
 
             reflected = self._reflect_payload
 
-            pattern = '\s+?.+?({reflected}).+?\n'.format(reflected=reflected)
+            pattern = '.+?({reflected}).+?\n'.format(reflected=reflected)
             re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
 
     def _feed_reflected_rows(self, match):
         start, _ = match.regs[0]
         stop, _ = match.regs[1]
 
-        search_additional = '.+?\n'
-        reflect_pattern = match.string[start:stop] + search_additional
-        reflect_pattern = self._escape_pattern(reflect_pattern[:-len(search_additional)])\
-                          + reflect_pattern[-len(search_additional):]
+        search_prefix = '\s+?'
+        search_suffix = '.+?\n'
+        reflect_pattern = self._escape_pattern(match.string[start:stop]) + search_suffix
+        # reflect_pattern = search_prefix + self._escape_pattern(reflect_pattern[:-len(search_suffix)])\
+        #                   + reflect_pattern[-len(search_suffix):]
 
         self.reflected_patterns |= set([reflect_pattern])
 
@@ -167,3 +177,8 @@ class Analyzer:
         pattern = pattern.replace('.', '\.').replace('+', '\+').replace('?', '\?')
 
         return pattern
+
+    def dump_response(self, filename, response_obj):
+        filepath = self.config['Program']['script_path'] + '/dumps/'
+        with open(filepath+filename, 'wb') as f:
+            f.write(response_obj.raw_response.encode())
