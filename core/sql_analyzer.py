@@ -6,7 +6,7 @@ class SqlAnalyzer(Analyzer):
     def __init__(self, marked_raw_request, config):
         Analyzer.__init__(self, marked_raw_request, config)
 
-        self.print_format = '{: <50}|{: ^10}|{: ^10}|{: ^20}|{: ^15}'
+        self.print_format = '{test_info: <50}|{response_code: ^5}|{content_length: ^10}|{row_count: ^10}|{testing_param: ^20}|{request_time: ^15}'
 
         self.sql_payloads = self.get_payloads('/fuzzing/sql.txt')
         self.modified_requests = self.get_modified_requests(self.sql_payloads, flags=7)
@@ -28,8 +28,14 @@ class SqlAnalyzer(Analyzer):
             response_obj = self.response_queue.get()
             response_obj = self.clean_reflected_rows(response_obj)
             if self.is_interesting_behavior(response_obj, 3):
-                s = self.print_format.format(response_obj.test_info, response_obj.content_length, response_obj.row_count,
-                      response_obj.testing_param, response_obj.request_time)
-                print(s)
-                responses.append(response_obj)
 
+                kwargs = {
+                    'test_info':response_obj.test_info,
+                    'response_code':response_obj.response_code,
+                    'content_length':response_obj.content_length,
+                    'row_count':response_obj.row_count,
+                    'testing_param':response_obj.testing_param,
+                    'request_time':response_obj.request_time
+                }
+                print(self.print_format.format(**kwargs))
+                responses.append(response_obj)

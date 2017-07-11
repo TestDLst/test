@@ -1,5 +1,5 @@
 class ResponseObject:
-    def __init__(self, raw_response=None, request_object=None, request_time=None):
+    def __init__(self, raw_response=None, request_object=None, request_time=None, response_code=None):
         self.request_object = request_object
         self.raw_response = raw_response
 
@@ -10,6 +10,7 @@ class ResponseObject:
         self.request_time = request_time
         self.content_length = len(self.raw_response)
         self.row_count = len(self.raw_response.splitlines())
+        self.response_code = response_code
 
     def rebuild(self, raw_response):
         self.raw_response = raw_response

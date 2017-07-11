@@ -62,7 +62,7 @@ class RequestModifier:
 
             kwargs = {
                 'testing_param': param_name,
-                'test_info': param_name + '=' + modified_value.replace(self.injection_mark, ''),
+                'test_info': param_name + '=' + (match.string[start:end] + payload).replace(self.injection_mark, '').replace(self.injection_mark, ''),
                 'payload': payload
             }
 
