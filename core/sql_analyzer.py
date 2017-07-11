@@ -39,3 +39,10 @@ class SqlAnalyzer(Analyzer):
                 }
                 print(self.print_format.format(**kwargs))
                 responses.append(response_obj)
+
+    def analyze_blind(self):
+        sql_payloads = self.get_payloads('/fuzzing/sql_blind_and.txt')
+        modified_requests = self.get_payloads(sql_payloads, flags=5)
+
+        for pair in zip(modified_requests[0::2], modified_requests[1::2]):
+            pass
