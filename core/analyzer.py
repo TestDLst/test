@@ -7,6 +7,7 @@ from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.requester import Requester
 
+
 # TODO: encode пейлоадов
 class Analyzer:
     def __init__(self, marked_raw_request, config):
@@ -25,6 +26,9 @@ class Analyzer:
         self.response_queue = Queue()
         self.standard_response = self.get_standard_response()
 
+        self.print_format = '|{response_code: ^{}}|{content_length: ^{}}|{row_count: ^{}}|{word_count: ^{}}|{request_time: ^{}}|{test_info: ^{}}|'
+        self.print_format_size = [5, 10, 10, 10, 20, 65]
+
     def get_modified_requests(self, payloads, flags=7):
         """ Возвращает список измененных запросов
 
@@ -41,12 +45,13 @@ class Analyzer:
         return a
 
     def get_payloads(self, payload_path):
-        """ Возвращает список нагрузок из
+        """ Возвращает список нагрузок из директории payloads
 
         :param payload_path: путь до файла с нагрузками относительно дирестории payloads
         :return: Список нагрузок payloads
         """
-        with open(self.config['Program']['script_path'] + '/payloads' + payload_path) as f:
+
+        with open(payload_path) as f:
             payloads = f.read().split('\n')
         return payloads
 
@@ -102,6 +107,40 @@ class Analyzer:
         }
         print(print_format.format(**kwargs))
 
+    def print_head(self):
+        kwargs = {
+            'test_info': 'Текущий запрос',
+            'response_code': 'Код',
+            'content_length': 'Контент',
+            'row_count': 'Строки',
+            'word_count': 'Слова',
+            'request_time': 'Время запроса'
+        }
+        info = '_' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
+        info += '\n' + self.print_format.format(*self.print_format_size, **kwargs)
+
+        print(info)
+
+    def print_resp_info(self, response_obj):
+        kwargs = {
+            'test_info': response_obj.test_info,
+            'response_code': response_obj.response_code,
+            'content_length': response_obj.content_length,
+            'row_count': response_obj.row_count,
+            'word_count': response_obj.word_count,
+            'request_time': response_obj.request_time
+        }
+
+        info = self.print_format.format(*self.print_format_size, **kwargs)
+        # info = info.encode(encoding=encoding) if encoding else info
+
+        print(info)
+
+    def print_footer(self):
+        info = '_' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
+        # info = info.encode(encoding=encoding) if encoding else info
+        print(info)
+
     def clean_reflected_rows(self, response_obj):
         """ Удаляет рефлексирующие строки в response_obj по паттернам из self.reflected_patterns
 
@@ -127,7 +166,6 @@ class Analyzer:
 
         return match.string[start:whitespace_end]
 
-
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
 
@@ -140,7 +178,7 @@ class Analyzer:
         """
         resp_queue = Queue()
 
-        self._reflect_payload = ''.join([random.choice(string.ascii_letters) for i in range(6)])
+        self._reflect_payload = ''.join([random.choice(string.digits) for i in range(8)])
         requests = self.get_modified_requests([self._reflect_payload])
 
         requester = Requester(requests, resp_queue, self.config)
@@ -178,7 +216,8 @@ class Analyzer:
 
         return pattern
 
-    def dump_response(self, filename, response_obj):
+    def dump_response(self, filename, response_obj, encoding='utf8'):
         filepath = self.config['Program']['script_path'] + '/dumps/'
-        with open(filepath+filename, 'wb') as f:
-            f.write(response_obj.raw_response.encode())
+
+        with open(filepath + filename, 'wb') as f:
+            f.write(response_obj.raw_response.encode(encoding=encoding))

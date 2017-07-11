@@ -1,9 +1,8 @@
 import argparse
-import configparser
-import sys
-import os
-import re
 import codecs
+import configparser
+import os
+import sys
 from urllib.parse import urlparse
 
 from controller.controller import Controller
@@ -41,6 +40,8 @@ class Main:
         main_group = self.parser.add_argument_group('Main')
         main_group.add_argument('-u', '--url', dest='url', help='Адрес приложения (https://example.com:83)')
         main_group.add_argument('-f', '--file', dest='file', help='Файл с запросом')
+        main_group.add_argument('-w', '--wordlist', dest='wordlist', default='fuzzing/metacharacters.txt',
+                                help='Путь до словаря (абсолютный, относительный, от директории payloads)')
         main_group.add_argument('-t', '--threads', dest='threads', type=int, help='Количество потоков')
         main_group.add_argument('--proxy', dest='proxy',
                                 help='Адрес прокси-сервера (http://127.0.0.1:8080, socks5://127.0.0.1:9050, ...)')
@@ -57,10 +58,25 @@ class Main:
     def check_arguments(self):
         _args, _cfg = self.arguments, self.config
 
+        # Указан ли url
         if not _args.url and not _cfg['Main']['url']:
             self._print_error_message('Не найден url адрес цели')
+
+        # Указан ли путь до запроса
         if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['Main']['file']:
             self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле')
+
+        # Если словарь задан через параметр
+        if _args.wordlist:
+            if not os.path.isfile(_args.wordlist) and not os.path.isfile('payloads/'+_args.wordlist):
+                self._print_error_message('Укажите коррекнтый путь до словаря через -w')
+        # Если есть запись в конфиге (должен хранится полный путь)
+        elif _cfg['Main']['wordlist']:
+            if not os.path.isfile(_cfg['Main']['wordlist']):
+                self._print_error_message('Укажите коррекнтый путь до словаря через -w')
+        # Если нет упоминаний о словаре
+        else:
+            self._print_error_message('Укажите коррекнтый путь до словаря через -w')
 
         del _args, _cfg
 
@@ -81,6 +97,9 @@ class Main:
 
     # Потестить
     def merge_args_to_config(self):
+        # Указываем путь до main.py
+        self.config['Program']['script_path'] = self.script_path
+
         if self.arguments.url:
             self.config['Main']['url'] = self.arguments.url
         if self.arguments.url:
@@ -97,6 +116,15 @@ class Main:
         self.config['RequestInfo']['scheme'] = url_scheme
         self.config['RequestInfo']['port'] = url_port
 
+        # Указываем путь до словаря
+        if self.arguments.wordlist:
+            if os.path.isfile(self.arguments.wordlist):
+                self.config['Main']['wordlist'] = self.arguments.wordlist
+            elif os.path.isfile('payloads/' + self.arguments.wordlist):
+                self.config['Main']['wordlist'] = self.script_path + '/payloads/' + self.arguments.wordlist
+            else:
+                raise Exception('Беда со словарем')
+
         # Парсим --proxy
         if self.arguments.proxy:
             proxy = urlparse(self.arguments.proxy)
@@ -109,18 +137,15 @@ class Main:
             self.config['Proxy']['host'] = proxy_host
             self.config['Proxy']['port'] = proxy_port
 
-        # Указываем путь до main.py
-        self.config['Program']['script_path'] = self.script_path
-
     # Потестить нестандартный путь
     def read_config(self, path=None):
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
             # config.read_file(open('config.ini','rb',encoding='utf8'))
-            config.read_file(codecs.open('config.ini','r',encoding='utf8'))
+            config.read_file(codecs.open('config.ini', 'r', encoding='utf8'))
         else:
-            config.read_file(codecs.open(path,'r',encoding='utf8'))
+            config.read_file(codecs.open(path, 'r', encoding='utf8'))
         return config
 
     def save_current_config(self):
@@ -131,6 +156,7 @@ class Main:
         self.arguments.url = 'http://www.penki.lt/lt/Search?searchText=*&Category=0&BeginDate=&EndDate='
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
+        self.arguments.wordlist = 'fuzzing/metacharacters.txt'
         self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
