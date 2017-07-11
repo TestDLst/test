@@ -108,6 +108,7 @@ class Requester:
                 connection.sock = socks.socksocket()
                 sock_type = socks.PROXY_TYPE_SOCKS4 if proxy_scheme.startswith('socks4') else socks.PROXY_TYPE_SOCKS5
                 connection.sock.set_proxy(sock_type, proxy_host, int(proxy_port))
+                connection.sock.connect((request.host, port))
         else:
             connection = connection(request.host, port)
 
