@@ -148,11 +148,16 @@ class Analyzer:
             f.write(response_obj.raw_response.encode(encoding=encoding))
 
     def print_standard_resp_info(self):
-        print_format = '[!] Информация по стандартному ответу\n\tСтандартная длина контента: {content_length}' \
-                       '\n\tСтандартное количество строк: {row_count}\n\tВременной интервал: {min}/{max}\n'
+        print_format = """[!] Информация по стандартному ответу
+    Стандартная длина контента: {content_length}
+    Стандартное количество строк: {row_count}
+    Стандартное количество слов: {word_count}
+    Временной интервал: {min}/{max}\n"""
+
         kwargs = {
             'content_length': self.standard_response.content_length,
             'row_count': self.standard_response.row_count,
+            'word_count': self.standard_response.word_count,
             'min': self.time_delta[0],
             'max': self.time_delta[1]
         }
@@ -226,4 +231,3 @@ class Analyzer:
         pattern = pattern.replace('.', '\.').replace('+', '\+').replace('?', '\?')
 
         return pattern
-
