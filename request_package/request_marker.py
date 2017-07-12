@@ -17,14 +17,19 @@ class RequestMarker:
         self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
 
         self.excluded_headers = {'Host', 'Accept', 'Accept-Language', 'Accept-Encoding', 'Connection', 'Content-Type',
-                                 'Content-Length', 'Upgrade-Insecure-Requests'} # Если можно будет указывать, какие параметры пропускать
+                                 'Content-Length', 'Upgrade-Insecure-Requests', 'X-Originating-IP', 'X-Remote-IP',
+                                 'X-Remote-Addr', 'X-Client-IP'} # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
         self.extra_headers = {
             'User-Agent': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30',
             'Referer': '127.0.0.1',
             'X-Forwarded-For': '127.0.0.1',
-            'X-Forwarded-Host': 'localhost'
+            'X-Forwarded-Host': 'localhost',
+            'X-Originating-IP': '127.0.0.1',
+            'X-Remote-IP': '127.0.0.1',
+            'X-Remote-Addr': '127.0.0.1',
+            'X-Client-IP': '127.0.0.1'
         }
 
         self.request_object = request_object
