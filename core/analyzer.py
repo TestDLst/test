@@ -1,6 +1,7 @@
 import random
 import re
 import string
+import codecs
 from queue import Queue
 
 from request_package.request_modifier import RequestModifier
@@ -60,7 +61,7 @@ class Analyzer:
 
         :return: Инициализирующий запрос RequestObject
         """
-        with open(self.config['Main']['file']) as f:
+        with codecs.open(self.config['Main']['file'], 'r', encoding='utf8') as f:
             initial_request = f.read()
         return RequestObject(initial_request)
 

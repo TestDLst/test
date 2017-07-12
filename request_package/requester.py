@@ -114,7 +114,7 @@ class Requester:
 
         try:
             request_time = time()
-            connection.request(request.method, request.url_path, request.data, headers=request.headers)
+            connection.request(request.method, request.url_path, request.data.encode('utf8'), headers=request.headers)
             resp = connection.getresponse()
             request_time = time() - request_time
             connection.close()

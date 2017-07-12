@@ -1,12 +1,12 @@
-POST / HTTP/1.1
+POST /xml/get_availdates_back.php HTTP/1.1
 Host: avtovokzal39.ru
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept: application/json, text/javascript, */*; q=0.01
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
 Accept-Encoding: gzip, deflate
-Referer: http://avtovokzal39.ru/
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
 Cookie: PHPSESSID=qh8gqtn4m2klanoipoo3chl9v0; _ga=GA1.2.260609115.1499866348; _gid=GA1.2.852523300.1499866348; _gat=1
 Connection: close
-Content-Type: application/x-www-form-urlencoded
 
-country_id=0&timestamp=12.07.2017&time_s=05%3A00&time_do=23%3A30
+country_id=Барановичи

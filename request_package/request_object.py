@@ -1,3 +1,5 @@
+import re
+
 class RequestObject:
     def __init__(self, request, testing_param='', payload='', test_info=''):
         self.index = None
@@ -19,6 +21,7 @@ class RequestObject:
         self.headers = dict()
         self.headers_list = []
         self.content_type = None
+        self.charset = 'utf8'
         self.data = ''
         self.known_types = {'text': {'html': 'plain', 'plain': 'plain', 'xml': 'xml'},
                             'application': {'atom+xml': 'xml', 'json': 'json', 'soap+xml': 'xml', 'xhtml+xml': 'xml',
@@ -48,8 +51,10 @@ class RequestObject:
         """Находит хидер Content-type, парсит type и subtype и определяет по known_types форму данных"""
         # content_type = next((header for header in self.headers if header.startswith('Content-Type')), None)
         content_type = self.headers.get('Content-Type')
+        content_type = re.search('([\w-]+/[\w-]+)', content_type) if content_type is not None else None
 
         if content_type:
+            content_type = content_type.group(1)
             type, subtype = content_type.split('/')
             self.content_type = self.known_types.get(type)
             self.content_type = self.content_type.get(subtype) if self.content_type else None

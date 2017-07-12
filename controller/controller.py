@@ -1,3 +1,5 @@
+import codecs
+
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
 from core.common_analyzer import CommonAnalyzer
@@ -19,6 +21,6 @@ class Controller:
 
         :return: Инициализирующий запрос RequestObject
         """
-        with open(self.config['Main']['file']) as f:
+        with codecs.open(self.config['Main']['file'], 'r', encoding='utf8') as f:
             initial_request = f.read()
         return RequestObject(initial_request)
