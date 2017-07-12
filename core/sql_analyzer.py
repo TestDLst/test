@@ -10,7 +10,7 @@ class SqlAnalyzer(Analyzer):
         pass
 
 
-class BlindSqlAnalyzer(SqlAnalyzer):
+class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
     def __init__(self, marked_raw_request, config):
         SqlAnalyzer.__init__(self, marked_raw_request, config)
 
@@ -23,7 +23,7 @@ class BlindSqlAnalyzer(SqlAnalyzer):
 
     # TODO Подумать, что делать в случае отсутствия каких то ответов
     def analyze(self):
-        print('[!] Запускаю BlindSqlAnalyzer')
+        print('[!] Запускаю Blind Boolean Based SqlAnalyzer')
         requester = Requester(self.modified_requests, self.response_queue, self.config)
         requester.run()
 
@@ -41,6 +41,8 @@ class BlindSqlAnalyzer(SqlAnalyzer):
                 print("ERROR")
 
         print('[!] Сравниваю ответы')
+        self.print_head()
+        self.print_footer()
         for resp1, resp2 in responses:
             self._check_diff(resp1, resp2)
 

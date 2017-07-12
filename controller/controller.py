@@ -1,7 +1,7 @@
 from request_package.request_object import RequestObject
 from request_package.request_marker import RequestMarker
 from core.common_analyzer import CommonAnalyzer
-from core.sql_analyzer import SqlAnalyzer, BlindSqlAnalyzer
+from core.sql_analyzer import SqlAnalyzer, BlindBooleanBasedSqlAnalyzer
 
 
 class Controller:
@@ -11,7 +11,7 @@ class Controller:
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
-        analyzer = BlindSqlAnalyzer(self.marked_raw_request, self.config)
+        analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.config)
         analyzer.analyze()
 
     def get_initial_request(self):
