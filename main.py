@@ -153,7 +153,7 @@ class Main:
             self.config.write(config_file)
 
     def _test(self):
-        self.arguments.url = 'http://www.penki.lt/lt/Search?searchText=*&Category=0&BeginDate=&EndDate='
+        self.arguments.url = 'http://www.kfc.ro/thumbnail.php?ImagineID=5041&Size=280'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
