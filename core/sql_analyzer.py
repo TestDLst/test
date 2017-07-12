@@ -27,24 +27,39 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
         requester = Requester(self.modified_requests, self.response_queue, self.config)
         requester.run()
 
-        responses = []
+        responses = [None for _ in range(len(self.modified_requests))]
+        self.print_head()
 
         while requester.is_running() or not self.response_queue.empty():
-            responses.append(self.response_queue.get())
+            response_obj = self.response_queue.get()
+            responses[response_obj.index] = response_obj
 
-        responses.sort(key=lambda x: x.index)
+            if response_obj.index % 2 == 0:
+                index = response_obj.index + 1
+            else:
+                index = response_obj.index - 1
 
-        responses = list(zip(responses[::2], responses[1::2]))
+            if responses[index] is not None:
+                resp1 = response_obj
+                resp2 = responses[index]
+                print("check %d and %d" % (resp1.index, resp2.index))
+                self._check_diff(resp1, resp2)
 
-        for resp1, resp2 in responses:
-            if resp1.index + 1 != resp2.index:
-                print("ERROR")
-
-        print('[!] Сравниваю ответы')
-        self.print_head()
-        for resp1, resp2 in responses:
-            self._check_diff(resp1, resp2)
         self.print_footer()
+
+        # responses.sort(key=lambda x: x.index)
+        #
+        # responses = list(zip(responses[::2], responses[1::2]))
+        #
+        # for resp1, resp2 in responses:
+        #     if resp1.index + 1 != resp2.index:
+        #         print("ERROR")
+        #
+        # print('[!] Сравниваю ответы')
+        # self.print_head()
+        # for resp1, resp2 in responses:
+        #     self._check_diff(resp1, resp2)
+        # self.print_footer()
 
     def _check_diff(self, resp1, resp2):
         if resp1.response_code != resp2.response_code or resp1.content_length != resp2.content_length \
