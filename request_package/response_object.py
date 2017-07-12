@@ -2,7 +2,9 @@ import re
 
 
 class ResponseObject:
-    def __init__(self, raw_response=None, request_object=None, request_time=None, response_code=None):
+    def __init__(self, raw_response=None, request_object=None, request_time=None, response_code=None, index=None):
+        self.index = index
+
         self.request_object = request_object
         self.raw_response = raw_response
 

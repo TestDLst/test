@@ -119,7 +119,7 @@ class Requester:
         connection.close()
 
         response_obj = ResponseObject(raw_response=resp.read().decode(), request_object=request,
-                                      request_time=request_time, response_code=resp.getcode())
+                                      request_time=request_time, response_code=resp.getcode(), index=request.index)
 
         self.add_response(response_obj)
 
