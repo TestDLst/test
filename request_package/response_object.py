@@ -45,8 +45,10 @@ class ResponseObject:
 
         soup = BeautifulSoup(raw_response, 'html.parser')
         meta = soup.find('meta', attrs={'http-equiv': 'Content-Type'})
-        content_type = re.search('charset=([\w-]+)', meta['content'])
-        if content_type is not None:
-            return content_type.group(1)
+
+        if meta is not None:
+            content_type = re.search('charset=([\w-]+)', meta['content'])
+            if content_type is not None:
+                return content_type.group(1)
 
         return 'utf8'

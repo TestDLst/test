@@ -1,5 +1,5 @@
 import re
-from urllib.parse import quote
+from urllib.parse import quote, quote_plus
 
 from request_package.request_object import RequestObject
 
@@ -54,15 +54,15 @@ class RequestModifier:
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
 
         for payload in self.payloads:
-            modified_value = quote((match.string[start:end] + payload).replace(self.injection_mark, ''))
-            modified_query_string = match.string[:start] + modified_value + match.string[end:]
+            modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
+            modified_query_string = match.string[:start] + quote_plus(modified_value) + match.string[end:]
             modified_raw_request = '\r\n'.join([modified_query_string] + self.marked_request.headers_list) \
                                    + '\r\n\r\n' + self.marked_request.data
             modified_raw_request = modified_raw_request.replace(self.injection_mark, '')
 
             kwargs = {
                 'testing_param': param_name,
-                'test_info': param_name + '=' + (match.string[start:end] + payload).replace(self.injection_mark, '').replace(self.injection_mark, ''),
+                'test_info': param_name + '=' + (match.string[start:end] + payload).replace(self.injection_mark, ''),
                 'payload': payload
             }
 
@@ -119,8 +119,8 @@ class RequestModifier:
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
 
         for payload in self.payloads:
-            modified_value = match.string[start:end] + payload
-            modified_data = match.string[:start] + modified_value + match.string[end:]
+            modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
+            modified_data = match.string[:start] + quote_plus(modified_value) + match.string[end:]
             modified_raw_request = self.marked_request.query_string + '\r\n' + '\r\n'.join(
                 self.marked_request.headers_list) \
                                    + '\r\n\r\n' + modified_data
