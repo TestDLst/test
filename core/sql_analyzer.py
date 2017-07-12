@@ -42,9 +42,9 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
 
         print('[!] Сравниваю ответы')
         self.print_head()
-        self.print_footer()
         for resp1, resp2 in responses:
             self._check_diff(resp1, resp2)
+        self.print_footer()
 
     def _check_diff(self, resp1, resp2):
         if resp1.response_code != resp2.response_code or resp1.content_length != resp2.content_length \

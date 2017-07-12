@@ -112,15 +112,32 @@ class Requester:
         else:
             connection = connection(request.host, port)
 
-        request_time = time()
-        connection.request(request.method, request.url_path, request.data, headers=request.headers)
-        resp = connection.getresponse()
-        request_time = time() - request_time
-        connection.close()
+        try:
+            request_time = time()
+            connection.request(request.method, request.url_path, request.data, headers=request.headers)
+            resp = connection.getresponse()
+            request_time = time() - request_time
+            connection.close()
 
-        response_obj = ResponseObject(raw_response=resp.read().decode('windows-1251'), request_object=request,
-                                      request_time=request_time, response_code=resp.getcode(), index=request.index)
+            raw_response = resp.read().decode('windows-1251')
+            response_code = resp.getcode()
 
+        except Exception as e:
+            print('Ошибка в requester.py: {}'.format(e))
+
+            raw_response = ''
+            response_code = -1
+            request_time = -1
+
+        kwargs = {
+            'request_object': request,
+            'raw_response': raw_response,
+            'request_time': request_time,
+            'response_code': response_code,
+            'index': request.index
+        }
+
+        response_obj = ResponseObject(**kwargs)
         self.add_response(response_obj)
 
     def get_standard_response(self, request):
