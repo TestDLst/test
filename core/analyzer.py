@@ -96,76 +96,6 @@ class Analyzer:
     def analyze(self):
         raise Exception('Не реализовано')
 
-    def print_standard_resp_info(self):
-        print_format = '[!] Информация по стандартному ответу\n\tСтандартная длина контента: {content_length}' \
-                       '\n\tСтандартное количество строк: {row_count}\n\tВременной интервал: {min}/{max}\n'
-        kwargs = {
-            'content_length': self.standard_response.content_length,
-            'row_count': self.standard_response.row_count,
-            'min': self.time_delta[0],
-            'max': self.time_delta[1]
-        }
-        print(print_format.format(**kwargs))
-
-    def print_head(self):
-        kwargs = {
-            'test_info': 'Текущий запрос',
-            'response_code': 'Код',
-            'content_length': 'Контент',
-            'row_count': 'Строки',
-            'word_count': 'Слова',
-            'request_time': 'Время запроса'
-        }
-        info = '_' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
-        info += '\n' + self.print_format.format(*self.print_format_size, **kwargs)
-
-        print(info)
-
-    def print_resp_info(self, response_obj):
-        kwargs = {
-            'test_info': response_obj.test_info,
-            'response_code': response_obj.response_code,
-            'content_length': response_obj.content_length,
-            'row_count': response_obj.row_count,
-            'word_count': response_obj.word_count,
-            'request_time': response_obj.request_time
-        }
-
-        info = self.print_format.format(*self.print_format_size, **kwargs)
-        # info = info.encode(encoding=encoding) if encoding else info
-
-        print(info)
-
-    def print_footer(self):
-        info = '_' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
-        # info = info.encode(encoding=encoding) if encoding else info
-        print(info)
-
-    def clean_reflected_rows(self, response_obj):
-        """ Удаляет рефлексирующие строки в response_obj по паттернам из self.reflected_patterns
-
-        :param response_obj: Объект ответа, который необходимо отчистить от  рефлексирующих строк
-        :return:
-        """
-        raw_response = response_obj.raw_response
-        for reflect_pattern in self.reflected_patterns:
-            try:
-                raw_response = re.sub(reflect_pattern, self._cut_non_whitespace, raw_response)
-                response_obj.rebuild(raw_response)
-            except Exception as e:
-                print(reflect_pattern)
-                print(e)
-        return response_obj
-
-    def _cut_non_whitespace(self, match):
-        start, stop = match.regs[0]
-        whitespace_end = start
-
-        while match.string[whitespace_end] in string.whitespace:
-            whitespace_end += 1
-
-        return match.string[start:whitespace_end]
-
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
 
@@ -194,6 +124,87 @@ class Analyzer:
             pattern = '.+?({reflected}).+?\n'.format(reflected=reflected)
             re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
 
+    def clean_reflected_rows(self, response_obj):
+        """ Удаляет рефлексирующие строки в response_obj по паттернам из self.reflected_patterns
+
+        :param response_obj: Объект ответа, который необходимо отчистить от  рефлексирующих строк
+        :return:
+        """
+        raw_response = response_obj.raw_response
+        for reflect_pattern in self.reflected_patterns:
+            try:
+                raw_response = re.sub(reflect_pattern, self._cut_non_whitespace, raw_response)
+                response_obj.rebuild(raw_response)
+            except Exception as e:
+                print(reflect_pattern)
+                print(e)
+        return response_obj
+
+    def dump_response(self, filename, response_obj, encoding='utf8'):
+        filename = self._get_valid_filename(filename)
+        filepath = self.config['Program']['script_path'] + '/dumps/'
+
+        with open(filepath + filename, 'wb') as f:
+            f.write(response_obj.raw_response.encode(encoding=encoding))
+
+    def print_standard_resp_info(self):
+        print_format = '[!] Информация по стандартному ответу\n\tСтандартная длина контента: {content_length}' \
+                       '\n\tСтандартное количество строк: {row_count}\n\tВременной интервал: {min}/{max}\n'
+        kwargs = {
+            'content_length': self.standard_response.content_length,
+            'row_count': self.standard_response.row_count,
+            'min': self.time_delta[0],
+            'max': self.time_delta[1]
+        }
+        print(print_format.format(**kwargs))
+
+    def print_head(self):
+        kwargs = {
+            'test_info': 'Текущий запрос',
+            'response_code': 'Код',
+            'content_length': 'Контент',
+            'row_count': 'Строки',
+            'word_count': 'Слова',
+            'request_time': 'Время запроса'
+        }
+        info = '\u005f' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
+        info += '\n' + self.print_format.format(*self.print_format_size, **kwargs)
+
+        print(info)
+
+    def print_resp_info(self, response_obj):
+        kwargs = {
+            'test_info': response_obj.test_info,
+            'response_code': response_obj.response_code,
+            'content_length': response_obj.content_length,
+            'row_count': response_obj.row_count,
+            'word_count': response_obj.word_count,
+            'request_time': response_obj.request_time
+        }
+
+        info = self.print_format.format(*self.print_format_size, **kwargs)
+        # info = info.encode(encoding=encoding) if encoding else info
+
+        print(info)
+
+    def print_footer(self):
+        info = '-' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
+        # info = info.encode(encoding=encoding) if encoding else info
+        print(info)
+
+    def _get_valid_filename(self, filename):
+        filename = str(filename).strip().replace(' ', '_')
+        return re.sub(r'(?u)[^-\w.]', '', filename)
+
+    def _cut_non_whitespace(self, match):
+        start, stop = match.regs[0]
+        whitespace_end = start
+
+        while match.string[whitespace_end] in string.whitespace:
+            whitespace_end += 1
+
+        return match.string[start:whitespace_end]
+
     def _feed_reflected_rows(self, match):
         start, _ = match.regs[0]
         stop, _ = match.regs[1]
@@ -216,8 +227,3 @@ class Analyzer:
 
         return pattern
 
-    def dump_response(self, filename, response_obj, encoding='utf8'):
-        filepath = self.config['Program']['script_path'] + '/dumps/'
-
-        with open(filepath + filename, 'wb') as f:
-            f.write(response_obj.raw_response.encode(encoding=encoding))

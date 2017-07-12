@@ -11,8 +11,8 @@ class CommonAnalyzer(Analyzer):
         self.sql_payloads = self.get_payloads(config['Main']['wordlist'])
         self.modified_requests = self.get_modified_requests(self.sql_payloads, flags=7)
 
-        # self.detect_reflected_patterns()
-        # self.clean_reflected_rows(self.standard_response)
+        self.detect_reflected_patterns()
+        self.clean_reflected_rows(self.standard_response)
 
     def analyze(self):
         requester = Requester(self.modified_requests, self.response_queue, self.config)
@@ -30,7 +30,7 @@ class CommonAnalyzer(Analyzer):
             response_obj = self.clean_reflected_rows(response_obj)
 
             if self.is_interesting_behavior(response_obj, 3):
-                # self.dump_response(response_obj.test_info, response_obj)
+                self.dump_response(response_obj.test_info, response_obj)
                 self.print_resp_info(response_obj)
                 responses.append(response_obj)
 
