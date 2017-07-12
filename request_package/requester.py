@@ -87,6 +87,7 @@ class Requester:
         """ Add a response to the response_queue """
         self.response_queue.put(response)
 
+    # TODO разобраться с нахождением кодировки в коде страницы или заголовках
     def _send_request(self, request):
         scheme = self.config['RequestInfo']['scheme'].lower()
         port = int(self.config['RequestInfo']['port'])
@@ -117,7 +118,7 @@ class Requester:
         request_time = time() - request_time
         connection.close()
 
-        response_obj = ResponseObject(raw_response=resp.read().decode(), request_object=request,
+        response_obj = ResponseObject(raw_response=resp.read().decode('windows-1251'), request_object=request,
                                       request_time=request_time, response_code=resp.getcode(), index=request.index)
 
         self.add_response(response_obj)

@@ -158,7 +158,7 @@ class Main:
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
-        self.arguments.proxy = 'socks5://127.0.0.1:9150'
+        self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 
