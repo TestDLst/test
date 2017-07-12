@@ -119,22 +119,29 @@ class Requester:
             request_time = time() - request_time
             connection.close()
 
-            raw_response = resp.read().decode('windows-1251')
+            raw_response = resp.read()
+            headers = dict(resp.getheaders())
+
+            encoding = ResponseObject.determine_charset(raw_response, headers)
+
+            raw_response = raw_response.decode(encoding)
             response_code = resp.getcode()
 
         except Exception as e:
-            print('Ошибка в requester.py: {}'.format(e))
+            print('[-] Ошибка в requester.py: {}'.format(e))
 
             raw_response = ''
             response_code = -1
             request_time = -1
+            headers = dict()
 
         kwargs = {
             'request_object': request,
             'raw_response': raw_response,
             'request_time': request_time,
             'response_code': response_code,
-            'index': request.index
+            'index': request.index,
+            'response_headers': headers
         }
 
         response_obj = ResponseObject(**kwargs)
