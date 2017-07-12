@@ -21,13 +21,12 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
         for index, request in enumerate(self.modified_requests):
             request.index = index
 
-    # TODO Подумать, что делать в случае отсутствия каких то ответов
     def analyze(self):
         print('[!] Запускаю Blind Boolean Based SqlAnalyzer')
         requester = Requester(self.modified_requests, self.response_queue, self.config)
         requester.run()
 
-        responses = [None for _ in range(len(self.modified_requests))]
+        responses = dict()
         self.print_head()
 
         while requester.is_running() or not self.response_queue.empty():
@@ -39,10 +38,10 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
             else:
                 index = response_obj.index - 1
 
-            if responses[index] is not None:
+            if responses.get(index) is not None:
                 resp1 = response_obj
                 resp2 = responses[index]
-                print("check %d and %d" % (resp1.index, resp2.index))
+                print("[D] Проверка {} и {} запросов".format(resp1.index, resp2.index))
                 self._check_diff(resp1, resp2)
 
         self.print_footer()
