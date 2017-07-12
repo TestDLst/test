@@ -87,7 +87,6 @@ class Requester:
         """ Add a response to the response_queue """
         self.response_queue.put(response)
 
-    # TODO: хидер Host при отправке через проксю смещается на рандомную позицию, что ломает запрос в бурпе
     def _send_request(self, request):
         scheme = self.config['RequestInfo']['scheme'].lower()
         port = int(self.config['RequestInfo']['port'])
