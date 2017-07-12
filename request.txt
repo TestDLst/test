@@ -1,8 +1,12 @@
-GET /lt/SearchArticles?searchText=1&Category=1 HTTP/1.1
-Host: www.penki.lt
+POST / HTTP/1.1
+Host: avtovokzal39.ru
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Referer: http://avtovokzal39.ru/
+Content-Type: application/x-www-form-urlencoded
+Cookie: PHPSESSID=4dqfmn9sqg118jgkgnj85r9i14
 Connection: close
 Upgrade-Insecure-Requests: 1
 
+country_id=%C3%F3%F1%E5%E2&region_id=%C2%E5%F1%E5%EB%EE%E2%EA%E0&timestamp=11.08.2017&time_s=05%3A00&time_do=23%3A30

@@ -15,6 +15,8 @@ class BlindSqlAnalyzer(SqlAnalyzer):
         SqlAnalyzer.__init__(self, marked_raw_request, config)
 
         self.blind_sql_and_payloads = self.get_payloads(self.config['Program']['script_path'] + '/payloads/fuzzing/sql_blind_and.txt')
+        self.blind_sql_or_payloads = self.get_payloads(self.config['Program']['script_path'] + '/payloads/fuzzing/sql_blind_or.txt')
+
         self.modified_requests = self.get_modified_requests(self.blind_sql_and_payloads, flags=5)
         for index, request in enumerate(self.modified_requests):
             request.index = index
