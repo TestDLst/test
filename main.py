@@ -99,6 +99,7 @@ class Main:
     def merge_args_to_config(self):
         # Указываем путь до main.py
         self.config['Program']['script_path'] = self.script_path
+        self.config['Program']['payload_path'] = self.script_path + '/payloads/'
 
         if self.arguments.url:
             self.config['Main']['url'] = self.arguments.url
