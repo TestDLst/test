@@ -7,9 +7,9 @@ from queue import Queue
 from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.requester import Requester
+from encoders.encoder import no_encode
 
 
-# TODO: encode пейлоадов
 class Analyzer:
     def __init__(self, marked_raw_request, config):
         self.CONTENT_LENGTH = 1
@@ -30,7 +30,7 @@ class Analyzer:
         self.print_format = '|{response_code: ^{}}|{content_length: ^{}}|{row_count: ^{}}|{word_count: ^{}}|{request_time: ^{}}|{test_info: ^{}}|'
         self.print_format_size = [5, 10, 10, 10, 20, 65]
 
-    def get_modified_requests(self, payloads, flags=7):
+    def get_modified_requests(self, payloads, encode_func, flags=7):
         """ Возвращает список измененных запросов
 
         Модифицирует части начального запроса согласно параметру flags. Для модификации строки запроса используется
@@ -41,7 +41,7 @@ class Analyzer:
         :param flags: Число, указывающее, какие части запроса модифицировать
         :return: Список объектов RequestObject
         """
-        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
+        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config, encode_func)
         a = request_modifier.get_modified_requests(flags=flags)
         return a
 
@@ -110,7 +110,7 @@ class Analyzer:
         resp_queue = Queue()
 
         self._reflect_payload = ''.join([random.choice(string.digits) for i in range(8)])
-        requests = self.get_modified_requests([self._reflect_payload])
+        requests = self.get_modified_requests([self._reflect_payload], no_encode)
 
         requester = Requester(requests, resp_queue, self.config)
         requester.run()
@@ -124,6 +124,12 @@ class Analyzer:
 
             pattern = '.+?({reflected}).+?\n'.format(reflected=reflected)
             re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
+
+    def detect_waf_ids_ips(self):
+        # Реагировать на 401, 403 и 504 ошибки
+        # Чекать кукисы
+        # Считать, что везде есть waf :)
+        return True
 
     def clean_reflected_rows(self, response_obj):
         """ Удаляет рефлексирующие строки в response_obj по паттернам из self.reflected_patterns

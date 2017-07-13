@@ -1,4 +1,5 @@
 import argparse
+import string
 import codecs
 import configparser
 import os
@@ -10,6 +11,7 @@ from controller.controller import Controller
 
 # TODO: Создавать конфиг файл. В случае его отсутствия предлагать создать новый
 # TODO: Добавить --exclude/--include параметры
+# TODO: --max-rate пакетов
 class Main:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -103,19 +105,23 @@ class Main:
 
         if self.arguments.url:
             self.config['Main']['url'] = self.arguments.url
-        if self.arguments.url:
+
+            url = urlparse(self.arguments.url)
+            url_scheme = url.scheme if url.scheme else 'http'
+            url_port = url.port if url.port else ('80' if url_scheme == 'http' else '443')
+
+            self.config['RequestInfo']['scheme'] = url_scheme
+            self.config['RequestInfo']['port'] = url_port
+
+        if self.arguments.file:
             self.config['Main']['file'] = self.arguments.file
         if self.arguments.threads:
             self.config['Main']['threads'] = str(self.arguments.threads)
 
         # Парсим --url
-        url = urlparse(self.arguments.url)
-        url_scheme = url.scheme if url.scheme else self.config['RequestInfo']['scheme']
-        url_port = url.port if url.port else self.config['RequestInfo']['port']
 
         # Распихиваем --url по конфигу
-        self.config['RequestInfo']['scheme'] = url_scheme
-        self.config['RequestInfo']['port'] = url_port
+
 
         # Указываем путь до словаря
         if self.arguments.wordlist:
@@ -154,11 +160,11 @@ class Main:
             self.config.write(config_file)
 
     def _test(self):
-        self.arguments.url = 'http://www.kfc.ro/thumbnail.php?ImagineID=5041&Size=280'
+        self.arguments.url = 'https://a1-market.ru/'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 10
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
-        self.arguments.proxy = 'http://127.0.0.1:8080'
+        # self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 

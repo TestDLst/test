@@ -36,19 +36,20 @@ class ResponseObject:
         :param response_headers:
         :return:
         """
+        content_type = 'utf-8'
 
         header = response_headers.get('Content-Type')
         if header is not None:
-            content_type = re.search('charset=([\w-]+)', response_headers['Content-Type'])
-            if content_type is not None:
-                return content_type.group(1)
+            header_content_type = re.search('charset=([\w-]+)', response_headers['Content-Type'])
+            if header_content_type is not None:
+                content_type = header_content_type.group(1)
 
         soup = BeautifulSoup(raw_response, 'html.parser')
         meta = soup.find('meta', attrs={'http-equiv': 'Content-Type'})
 
         if meta is not None:
-            content_type = re.search('charset=([\w-]+)', meta['content'])
-            if content_type is not None:
-                return content_type.group(1)
+            meta_content_type = re.search('charset=([\w-]+)', meta['content'])
+            if meta_content_type is not None:
+                content_type = meta_content_type.group(1)
 
-        return 'utf8'
+        return content_type

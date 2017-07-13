@@ -1,51 +1,48 @@
 import re
 import string
+from urllib.parse import quote_plus
 
 
-class Encoder:
-    def __init__(self):
-        pass
+def no_encode(payload):
+    return payload
 
-    @staticmethod
-    def double_url_encode(payload):
-        retVal = payload
 
-        if payload:
-            retVal = ""
-            i = 0
+def url_encode(payload):
+    return quote_plus(payload)
 
-            while i < len(payload):
-                if payload[i] == '%' and (i < len(payload) - 2) and payload[
-                                                                    i + 1:i + 2] in string.hexdigits and payload[
-                                                                                                         i + 2:i + 3] in string.hexdigits:
-                    retVal += '%%25%s' % payload[i + 1:i + 3]
-                    i += 3
-                else:
-                    retVal += '%%25%.2X' % ord(payload[i])
-                    i += 1
 
-        return retVal
+def double_url_encode(payload):
+    return quote_plus(quote_plus(payload))
 
-    @staticmethod
-    def unicode_encode(payload):
-        retVal = payload
 
-        if payload:
-            retVal = ""
-            i = 0
+def unicode_encode(payload):
+    retVal = payload
 
-            while i < len(payload):
-                if payload[i] == '%' and (i < len(payload) - 2) and payload[
-                                                                    i + 1:i + 2] in string.hexdigits and payload[
-                                                                                                         i + 2:i + 3] in string.hexdigits:
-                    retVal += "%%u00%s" % payload[i + 1:i + 3]
-                    i += 3
-                else:
-                    retVal += '%%u%.4X' % ord(payload[i])
-                    i += 1
+    if payload:
+        retVal = ""
+        i = 0
 
-        return retVal
+        while i < len(payload):
+            if payload[i] == '%' and (i < len(payload) - 2) and payload[
+                                                                i + 1:i + 2] in string.hexdigits and payload[
+                                                                                                     i + 2:i + 3] in string.hexdigits:
+                retVal += "%%u00%s" % payload[i + 1:i + 3]
+                i += 3
+            else:
+                retVal += '%%u%.4X' % ord(payload[i])
+                i += 1
 
-    @staticmethod
-    def html_encode(payload):
-        return re.sub(r"[^\w]", lambda match: "&#%d;" % ord(match.group(0)), payload) if payload else payload
+    return retVal
+
+
+def decimal_html_encode(payload):
+    return re.sub('.', lambda match: "&#{:0>7}".format(ord(match.group(0))), payload)
+
+
+def hexadecimal_html_encode(payload):
+    return re.sub('.', lambda match: "&#{}".format(hex(ord(match.group(0)))[1:]), payload)
+
+
+# if __name__ == '__main__':
+#     with open('../payloads/fuzzing/common.txt', 'w') as f:
+#         f.writelines('\n'.join(string.punctuation))

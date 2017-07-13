@@ -1,5 +1,6 @@
 from core.analyzer import Analyzer
 from request_package.requester import Requester
+from encoders.encoder import url_encode
 
 
 class SqlAnalyzer(Analyzer):
@@ -17,7 +18,7 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
         self.blind_sql_and_payloads = self.get_payloads(self.config['Program']['script_path'] + '/payloads/fuzzing/sql_blind_and.txt')
         self.blind_sql_or_payloads = self.get_payloads(self.config['Program']['script_path'] + '/payloads/fuzzing/sql_blind_or.txt')
 
-        self.modified_requests = self.get_modified_requests(self.blind_sql_and_payloads, flags=5)
+        self.modified_requests = self.get_modified_requests(self.blind_sql_and_payloads, url_encode, flags=5)
         for index, request in enumerate(self.modified_requests):
             request.index = index
 
@@ -41,7 +42,7 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
             if responses.get(index) is not None:
                 resp1 = response_obj
                 resp2 = responses[index]
-                print("[D] Проверка {} и {} запросов".format(resp1.index, resp2.index))
+                # print("[D] Проверка {} и {} запросов".format(resp1.index, resp2.index))
                 self._check_diff(resp1, resp2)
 
         self.print_footer()

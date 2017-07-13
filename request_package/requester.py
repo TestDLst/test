@@ -1,7 +1,10 @@
 import http.client as client
+import ssl
 from queue import Queue, Empty
 from threading import Thread
 from time import time
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 import socks
 
@@ -100,10 +103,12 @@ class Requester:
             raise Exception('Протокол {} не поддерживается'.format(scheme))
 
         proxy = self.config['Proxy']['scheme'], self.config['Proxy']['host'], self.config['Proxy']['port']
+
         if all(conf for conf in proxy):
             proxy_scheme, proxy_host, proxy_port = proxy
             connection = connection(proxy_host, int(proxy_port))
             connection.set_tunnel(request.host, port)
+
             if proxy_scheme.startswith('socks'):
                 connection.sock = socks.socksocket()
                 sock_type = socks.PROXY_TYPE_SOCKS4 if proxy_scheme.startswith('socks4') else socks.PROXY_TYPE_SOCKS5

@@ -1,13 +1,11 @@
-POST /bank/account-activity-find-transactions.html HTTP/1.1
-Host: zero.webappsecurity.com
+GET /akcii?page=2 HTTP/1.1
+Host: a1-market.ru
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
-Accept: */*
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
-Accept-Encoding: gzip, deflate
-Content-Type: application/x-www-form-urlencoded; charset=UTF-8
-X-Requested-With: XMLHttpRequest
-Referer: http://zero.webappsecurity.com/bank/account-activity.html?accountId=1
-Cookie: JSESSIONID=447FD13E
+Accept-Encoding: gzip, deflate, br
+Referer: https://a1-market.ru/akcii
+X-Moz: prefetch
+Cookie: PHPSESSID=e0fsr05l7c4r2d1giuov4jt8t3; prmn_fias=3736; language=ru; currency=RUB; _ym_uid=1499978620598232924; _ym_visorc_11626585=w; __utma=157587498.2071768486.1499978621.1499978621.1499978621.1; __utmb=157587498.1.10.1499978621; __utmc=157587498; __utmz=157587498.1499978621.1.1.utmcsr=a1shop.ru|utmccn=(referral)|utmcmd=referral|utmcct=/; __utmt=1; prmn_confirm=1; _ym_isad=2
 Connection: close
 
-currentAccountId=1&description=&fromDate=&toDate=&fromAmount=0&toAmount=10000&type=
