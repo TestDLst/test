@@ -14,17 +14,18 @@ class CommonAnalyzer(Analyzer):
     def __init__(self, marked_raw_request, config):
         Analyzer.__init__(self, marked_raw_request, config)
 
-        # self.detect_reflected_patterns()
-        # self.clean_reflected_rows(self.standard_response)
+        self.detect_reflected_patterns()
+        self.clean_reflected_rows(self.standard_response)
 
     def analyze(self):
+        self._response_id = 0
+
         common_payloads = self.get_payloads(self.config['Program']['payload_path'] + 'fuzzing/common.txt')
+        response_dict = defaultdict(lambda: defaultdict(list))
 
         encode_list = [url_encode, double_url_encode, overlong_utf8_encode]
         modified_request_groups = self.get_modified_request_groups(common_payloads, encode_list)
         modified_requests = reduce(add, zip(*modified_request_groups))
-
-        response_dict = defaultdict(lambda: defaultdict(list))
 
         self.print_standard_resp_info()
 
@@ -35,7 +36,9 @@ class CommonAnalyzer(Analyzer):
 
         while requester.is_running() or not self.response_queue.empty():
             response_obj = self.response_queue.get()
+            self.clean_reflected_rows(response_obj)
             response_dict[response_obj.gid][response_obj.id].append(response_obj)
+
             if len(response_dict[response_obj.gid].keys()) == len(encode_list):
                 self.print_result_for_response_group(response_dict[response_obj.gid])
 
@@ -59,5 +62,6 @@ class CommonAnalyzer(Analyzer):
         self.print_footer()
         for key in sorted(response_group.keys()):
             response_list = response_group[key][0]
-            self.print_resp_info(response_list, response_id=(response_list.gid + 1)*(response_list.id + 1))
+            self._response_id += 1
+            self.print_resp_info(response_list, response_id=self._response_id)
         self.print_footer()
