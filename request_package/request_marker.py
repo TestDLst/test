@@ -8,14 +8,14 @@ from request_package.json_mark import MyJSONEncoder
 class RequestMarker:
     # TODO: Разобраться с X-Forwarded-For: 127.0.0.1, 127.0.0.1
     # TODO: пропускать уже помеченные параметры
-    def __init__(self, request_object, config):
+    def __init__(self, request_object, properties):
         """Создает экзепляр класса RequestAnalyzer
 
         :param request_object: RequestObject экземпляр
-        :param config: объект конфгурации
+        :param properties: словарь, содержащий конфгурацию программы
         """
-        self.config = config
-        self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.config['Program']['injection_mark'])
+        self.properties = properties
+        self.injection_mark = '{mark}{0}{mark}'.format('{}', mark=self.properties['Program']['injection_mark'])
 
         self.excluded_headers = {'Host', 'Accept', 'Accept-Language', 'Accept-Encoding', 'Connection', 'Content-Type',
                                  'Content-Length', 'Upgrade-Insecure-Requests', 'X-Originating-IP', 'X-Remote-IP',

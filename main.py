@@ -4,6 +4,7 @@ import configparser
 import os
 import sys
 from urllib.parse import urlparse
+from collections import defaultdict
 
 from core.controller import Controller
 
@@ -17,6 +18,8 @@ class Main:
         self.parser = argparse.ArgumentParser()
         self.arguments = self.get_arguments()
         self.script_path = os.path.dirname(os.path.realpath(__file__))
+        # Содержит все важные параметры программы
+        self.properties = defaultdict(lambda: defaultdict(None))
 
         self.check_config_exist()
         self.config_path = self.arguments.config_file if self.arguments.config_file else 'config.ini'
@@ -26,16 +29,20 @@ class Main:
         self._test()
         self.check_arguments()
 
-        self.merge_args_to_config()
+        self.merge_args_and_config()
 
         if self.arguments.update_config:
             self.save_current_config()
 
+        # Заполняем объект properties для большей маневренности в плане хранимых значений
+        for section in self.config.sections():
+            for option in self.config[section]:
+                self.properties[section][option] = self.config.get(section, option)
+
         # Для импорта по пути относительно main.py
-        # Потестить
         sys.path.append(self.script_path)
 
-        self.controller = Controller(self.config)
+        self.controller = Controller(self.properties)
 
     # Потестить
     def get_arguments(self):
@@ -50,9 +57,9 @@ class Main:
 
         config_group = self.parser.add_argument_group('Config')
         config_group.add_argument('--update', dest='update_config', action='store_true',
-                                  help='Обновить конфигурационный файл (config.ini по умолчанию). \
-                  Используй --config-file, если файл не расположен по стандартному пути')
-        config_group.add_argument('--config-file', dest='config_file', help='Путь до конфигурационного файла')
+                                  help='Обновить конфигурационный файл (properties.ini по умолчанию). \
+                  Используй --properties-file, если файл не расположен по стандартному пути')
+        config_group.add_argument('--properties-file', dest='config_file', help='Путь до конфигурационного файла')
 
         return self.parser.parse_args()
 
@@ -98,7 +105,7 @@ class Main:
         exit()
 
     # Потестить
-    def merge_args_to_config(self):
+    def merge_args_and_config(self):
         # Указываем путь до main.py
         self.config['Program']['script_path'] = self.script_path
         self.config['Program']['payload_path'] = self.script_path + '/payloads/'
@@ -144,8 +151,8 @@ class Main:
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
-            # config.read_file(open('config.ini','rb',encoding='utf8'))
-            config.read_file(codecs.open('config.ini', 'r', encoding='utf8'))
+            # properties.read_file(open('properties.ini','rb',encoding='utf8'))
+            config.read_file(codecs.open('properties.ini', 'r', encoding='utf8'))
         else:
             config.read_file(codecs.open(path, 'r', encoding='utf8'))
         return config

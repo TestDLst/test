@@ -71,12 +71,12 @@ class ThreadPool:
 
 # TODO: редирект
 class Requester:
-    def __init__(self, requests=None, response_queue=None, config=None):
+    def __init__(self, requests=None, response_queue=None, properties=None):
         self.response_queue = response_queue
         self.requests = requests
-        self.config = config
+        self.properties = properties
 
-        self.num_threads = int(self.config['Main']['threads'])
+        self.num_threads = int(self.properties['Main']['threads'])
         self.pool = ThreadPool(self.num_threads)
 
         if requests:
@@ -94,8 +94,8 @@ class Requester:
 
     # TODO разобраться с нахождением кодировки в коде страницы или заголовках
     def _send_request(self, request):
-        scheme = self.config['RequestInfo']['scheme'].lower()
-        port = int(self.config['RequestInfo']['port'])
+        scheme = self.properties['RequestInfo']['scheme'].lower()
+        port = int(self.properties['RequestInfo']['port'])
 
         if scheme == 'http':
             connection = client.HTTPConnection
@@ -104,7 +104,7 @@ class Requester:
         else:
             raise Exception('Протокол {} не поддерживается'.format(scheme))
 
-        proxy = self.config['Proxy']['scheme'], self.config['Proxy']['host'], self.config['Proxy']['port']
+        proxy = self.properties['Proxy']['scheme'], self.properties['Proxy']['host'], self.properties['Proxy']['port']
 
         if all(conf for conf in proxy):
             proxy_scheme, proxy_host, proxy_port = proxy

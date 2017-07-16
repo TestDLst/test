@@ -6,16 +6,16 @@ from request_package.request_object import RequestObject
 
 
 class Controller:
-    def __init__(self, config):
+    def __init__(self, properties):
         # Объявления
-        self.config = config
+        self.properties = properties
         self.initial_request = self.get_initial_request()
-        self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
+        self.marked_raw_request = RequestMarker(self.initial_request, self.properties).get_marked_request()
 
-        analyzer = CommonAnalyzer(self.marked_raw_request, self.config)
+        analyzer = CommonAnalyzer(self.marked_raw_request, self.properties)
         analyzer.analyze()
 
-        # analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.config)
+        # analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.properties)
         # analyzer.analyze()
 
 
@@ -24,6 +24,6 @@ class Controller:
 
         :return: Инициализирующий запрос RequestObject
         """
-        with codecs.open(self.config['Main']['file'], 'r', encoding='utf8') as f:
+        with codecs.open(self.properties['Main']['file'], 'r', encoding='utf8') as f:
             initial_request = f.read()
         return RequestObject(initial_request)

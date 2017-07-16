@@ -11,8 +11,9 @@ from request_package.requester import Requester
 
 # TODO: Отправлять по 2 раза, выводить [len1/len2] по каждой метрике
 class CommonAnalyzer(Analyzer):
-    def __init__(self, marked_raw_request, config):
-        Analyzer.__init__(self, marked_raw_request, config)
+    def __init__(self, marked_raw_request, properties):
+        Analyzer.__init__(self, marked_raw_request, properties)
+        self.properties['CommonAnalyzer']['standard_response'] = self.standard_response
 
         self.detect_reflected_patterns()
         self.clean_reflected_rows(self.standard_response)
@@ -20,7 +21,7 @@ class CommonAnalyzer(Analyzer):
     def analyze(self):
         self._response_id = 0
 
-        common_payloads = self.get_payloads(self.config['Program']['payload_path'] + 'fuzzing/common.txt')
+        common_payloads = self.get_payloads(self.properties['Program']['payload_path'] + 'fuzzing/common.txt')
         response_dict = defaultdict(lambda: defaultdict(list))
 
         encode_list = [url_encode, double_url_encode, overlong_utf8_encode]
@@ -29,7 +30,7 @@ class CommonAnalyzer(Analyzer):
 
         self.print_standard_resp_info()
 
-        requester = Requester(modified_requests, self.response_queue, self.config)
+        requester = Requester(modified_requests, self.response_queue, self.properties)
         requester.run()
 
         self.print_head()

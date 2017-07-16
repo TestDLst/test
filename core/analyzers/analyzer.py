@@ -10,12 +10,12 @@ from request_package.requester import Requester
 
 
 class Analyzer:
-    def __init__(self, marked_raw_request, config):
+    def __init__(self, marked_raw_request, properties):
         self.CONTENT_LENGTH = 1
         self.ROW_COUNT = 2
         self.REQUEST_TIME = 4
 
-        self.config = config
+        self.properties = properties
         self.marked_raw_request = marked_raw_request
 
         self.reflected_patterns = set()
@@ -43,7 +43,7 @@ class Analyzer:
         if not isinstance(payloads, list):
             payloads = list(payloads)
 
-        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
+        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.properties)
         return request_modifier.get_modified_requests(flags=flags)
 
     def get_payloads(self, payload_path):
@@ -62,7 +62,7 @@ class Analyzer:
 
         :return: Инициализирующий запрос RequestObject
         """
-        with codecs.open(self.config['Main']['file'], 'r', encoding='utf8') as f:
+        with codecs.open(self.properties['Main']['file'], 'r', encoding='utf8') as f:
             initial_request = f.read()
         return RequestObject(initial_request)
 
@@ -75,9 +75,9 @@ class Analyzer:
         """
         print('[!] Получение стандартного ответа')
         # Предварительная отчистка запроса от маркеров
-        init_request = RequestObject(self.init_request_obj.raw_request.replace(self.config['Program']['injection_mark'], ''))
+        init_request = RequestObject(self.init_request_obj.raw_request.replace(self.properties['Program']['injection_mark'], ''))
 
-        requester = Requester(response_queue=self.response_queue, config=self.config)
+        requester = Requester(response_queue=self.response_queue, properties=self.properties)
         standard_response = requester.get_standard_response(init_request)
         self.time_delta = (standard_response.request_time, standard_response.request_time)
         return standard_response
@@ -99,7 +99,7 @@ class Analyzer:
         return False
 
     def analyze(self):
-        raise Exception('Не реализовано')
+        raise NotImplemented
 
     def detect_reflected_patterns(self):
         """ Определяет паттерны для рефлексирующих параметров в теле ответа
@@ -116,7 +116,7 @@ class Analyzer:
         self._reflect_payload = ''.join([random.choice(string.digits) for i in range(8)])
         requests = self.get_modified_requests([self._reflect_payload])
 
-        requester = Requester(requests, resp_queue, self.config)
+        requester = Requester(requests, resp_queue, self.properties)
         requester.run()
 
         print('[!] Определение рефлексирующих паттернов')
@@ -130,9 +130,7 @@ class Analyzer:
             re.sub(pattern, self._feed_reflected_rows, resp.raw_response)
 
     def detect_waf_ids_ips(self):
-        # Реагировать на 401, 403 и 504 ошибки
-        # Чекать кукисы
-        # Считать, что везде есть waf :)
+        # Считать, что везде есть waf
         return True
 
     def clean_reflected_rows(self, response_obj):
@@ -147,13 +145,12 @@ class Analyzer:
                 raw_response = re.sub(reflect_pattern, self._cut_non_whitespace, raw_response)
                 response_obj.rebuild(raw_response)
             except Exception as e:
-                print(reflect_pattern)
-                print(e)
+                print(reflect_pattern + '\n' + e)
         return response_obj
 
     def dump_response(self, filename, response_obj, encoding='utf8'):
         filename = self._get_valid_filename(filename)
-        filepath = self.config['Program']['script_path'] + '/dumps/'
+        filepath = self.properties['Program']['script_path'] + '/dumps/'
 
         with open(filepath + filename, 'wb') as f:
             f.write(response_obj.raw_response.encode(encoding=encoding))
@@ -225,11 +222,8 @@ class Analyzer:
         start, _ = match.regs[0]
         stop, _ = match.regs[1]
 
-        search_prefix = '\s+?'
         search_suffix = '.+?\n'
         reflect_pattern = self._escape_pattern(match.string[start:stop]) + search_suffix
-        # reflect_pattern = search_prefix + self._escape_pattern(reflect_pattern[:-len(search_suffix)])\
-        #                   + reflect_pattern[-len(search_suffix):]
 
         self.reflected_patterns |= set([reflect_pattern])
 
