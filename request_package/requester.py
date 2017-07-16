@@ -71,14 +71,16 @@ class ThreadPool:
 
 # TODO: редирект
 class Requester:
-    def __init__(self, requests, response_queue, config):
+    def __init__(self, requests=None, response_queue=None, config=None):
         self.response_queue = response_queue
         self.requests = requests
         self.config = config
 
         self.num_threads = int(self.config['Main']['threads'])
         self.pool = ThreadPool(self.num_threads)
-        self.pool.map(self._send_request, self.requests)
+
+        if requests:
+            self.pool.map(self._send_request, self.requests)
 
     def run(self):
         self.pool.run()
@@ -129,7 +131,7 @@ class Requester:
 
             encoding = ResponseObject.determine_charset(raw_response, headers)
 
-            raw_response = raw_response.decode(encoding)
+            raw_response = raw_response.decode(encoding=encoding)
             response_code = resp.getcode()
 
         except Exception as e:
@@ -145,7 +147,6 @@ class Requester:
             'raw_response': raw_response,
             'request_time': request_time,
             'response_code': response_code,
-            'index': request.index,
             'response_headers': headers
         }
 

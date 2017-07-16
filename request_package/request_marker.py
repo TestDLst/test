@@ -4,6 +4,7 @@ import re
 from request_package.json_mark import MyJSONEncoder
 
 
+# TODO: Маркировать точечно (page=abFUZZcd.html вместо page=abFUZZFUZZcd.html)
 class RequestMarker:
     # TODO: Разобраться с X-Forwarded-For: 127.0.0.1, 127.0.0.1
     # TODO: пропускать уже помеченные параметры

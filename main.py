@@ -1,17 +1,17 @@
 import argparse
-import string
 import codecs
 import configparser
 import os
 import sys
 from urllib.parse import urlparse
 
-from controller.controller import Controller
+from core.controller import Controller
 
 
 # TODO: Создавать конфиг файл. В случае его отсутствия предлагать создать новый
 # TODO: Добавить --exclude/--include параметры
 # TODO: --max-rate пакетов
+# TODO: задержка ответа
 class Main:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -118,11 +118,6 @@ class Main:
         if self.arguments.threads:
             self.config['Main']['threads'] = str(self.arguments.threads)
 
-        # Парсим --url
-
-        # Распихиваем --url по конфигу
-
-
         # Указываем путь до словаря
         if self.arguments.wordlist:
             if os.path.isfile(self.arguments.wordlist):
@@ -160,11 +155,11 @@ class Main:
             self.config.write(config_file)
 
     def _test(self):
-        self.arguments.url = 'https://a1-market.ru/'
+        self.arguments.url = 'http://schedule.kantiana.ru/'
         self.arguments.file = 'request.txt'
-        self.arguments.threads = 10
+        self.arguments.threads = 6
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
-        # self.arguments.proxy = 'http://127.0.0.1:8080'
+        self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 

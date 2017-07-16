@@ -4,7 +4,7 @@ from request_package.request_object import RequestObject
 
 
 class RequestModifier:
-    def __init__(self, marked_request, payloads, config, encode_func):
+    def __init__(self, marked_request, payloads, config):
         """ Конструктор
 
         :param marked_request: строка с промаркированным запросом
@@ -18,7 +18,6 @@ class RequestModifier:
         self.marked_request = RequestObject(marked_request)
         self.payloads = payloads
         self.config = config
-        self.encode_func = encode_func
 
         self.injection_mark = self.config['Program']['injection_mark']
         self.modified_requests = []
@@ -54,7 +53,6 @@ class RequestModifier:
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
 
         for payload in self.payloads:
-            payload = self.encode_func(payload)
             modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
             modified_query_string = match.string[:start] + modified_value + match.string[end:]
             modified_raw_request = '\r\n'.join([modified_query_string] + self.marked_request.headers_list) \
@@ -81,7 +79,6 @@ class RequestModifier:
                     start, end = match.regs[0]
 
                     for payload in self.payloads:
-                        payload = self.encode_func(payload)
                         modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
                         testing_param = modified_value.split('=')[0] if '=' in modified_value else ''
                         modified_header = header[:start] + modified_value + header[end:]
@@ -121,7 +118,6 @@ class RequestModifier:
         param_name = match.string[match.regs[1][0]:match.regs[1][1]]
 
         for payload in self.payloads:
-            payload = self.encode_func(payload)
             modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
             modified_data = match.string[:start] + modified_value + match.string[end:]
             modified_raw_request = self.marked_request.query_string + '\r\n' + '\r\n'.join(
@@ -140,7 +136,6 @@ class RequestModifier:
     def _feed_json_data(self, match):
         start, end = match.regs[0]
         for payload in self.payloads:
-            payload = self.encode_func(payload)
             _start, _end = self._get_testing_json_param_pos(match, len(payload))
             modified_value = match.string[start:end] + payload
             modified_data = match.string[:start] + modified_value + match.string[end:]
@@ -159,10 +154,10 @@ class RequestModifier:
 
             self.modified_requests.append(RequestObject(modified_raw_request, **kwargs))
 
+    # инжект внутрь ![CDATA[INJ]]
     def _feed_xml_data(self, match):
         start, end = match.regs[0]
         for payload in self.payloads:
-            payload = self.encode_func(payload)
             _start, _end = self._get_testing_xml_param_pos(match, len(payload))
             modified_value = match.string[start:end] + payload
             modified_data = match.string[:start] + modified_value + match.string[end:]

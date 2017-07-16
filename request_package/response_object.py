@@ -3,9 +3,10 @@ from bs4 import BeautifulSoup
 
 
 class ResponseObject:
-    def __init__(self, raw_response=None, request_object=None, request_time=None, response_code=None, index=None,
+    def __init__(self, raw_response=None, request_object=None, request_time=None, response_code=None,
                  response_headers=None):
-        self.index = index
+        self.gid = request_object.gid
+        self.id = request_object.id
 
         self.request_object = request_object
         self.raw_response = raw_response
@@ -38,12 +39,6 @@ class ResponseObject:
         """
         content_type = 'utf-8'
 
-        header = response_headers.get('Content-Type')
-        if header is not None:
-            header_content_type = re.search('charset=([\w-]+)', response_headers['Content-Type'])
-            if header_content_type is not None:
-                content_type = header_content_type.group(1)
-
         soup = BeautifulSoup(raw_response, 'html.parser')
         meta = soup.find('meta', attrs={'http-equiv': 'Content-Type'})
 
@@ -51,5 +46,14 @@ class ResponseObject:
             meta_content_type = re.search('charset=([\w-]+)', meta['content'])
             if meta_content_type is not None:
                 content_type = meta_content_type.group(1)
+
+        header = response_headers.get('Content-Type')
+
+        if header is not None:
+            header_content_type = re.search('charset=([\w-]+)', response_headers['Content-Type'])
+            if header_content_type is not None:
+                content_type = header_content_type.group(1)
+
+
 
         return content_type

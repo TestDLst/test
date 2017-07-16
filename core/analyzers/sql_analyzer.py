@@ -1,6 +1,6 @@
-from core.analyzer import Analyzer
+from core.analyzers.analyzer import Analyzer
+from core.encoder import url_encode
 from request_package.requester import Requester
-from encoders.encoder import url_encode
 
 
 class SqlAnalyzer(Analyzer):
@@ -42,17 +42,17 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
             if responses.get(index) is not None:
                 resp1 = response_obj
                 resp2 = responses[index]
-                # print("[D] Проверка {} и {} запросов".format(resp1.index, resp2.index))
+                # print("[D] Проверка {} и {} запросов".format(resp1.id, resp2.id))
                 self._check_diff(resp1, resp2)
 
         self.print_footer()
 
-        # responses.sort(key=lambda x: x.index)
+        # responses.sort(key=lambda x: x.id)
         #
         # responses = list(zip(responses[::2], responses[1::2]))
         #
         # for resp1, resp2 in responses:
-        #     if resp1.index + 1 != resp2.index:
+        #     if resp1.id + 1 != resp2.id:
         #         print("ERROR")
         #
         # print('[!] Сравниваю ответы')

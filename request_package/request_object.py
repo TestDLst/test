@@ -2,7 +2,8 @@ import re
 
 class RequestObject:
     def __init__(self, request, testing_param='', payload='', test_info=''):
-        self.index = None
+        self.gid = None
+        self.id = None
 
         self.testing_param = testing_param
         self.test_info = test_info

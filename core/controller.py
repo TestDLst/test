@@ -1,12 +1,10 @@
 import codecs
 
-from request_package.request_object import RequestObject
+from core.analyzers.common_analyzer import CommonAnalyzer
 from request_package.request_marker import RequestMarker
-from core.common_analyzer import CommonAnalyzer
-from core.sql_analyzer import SqlAnalyzer, BlindBooleanBasedSqlAnalyzer
+from request_package.request_object import RequestObject
 
 
-# TODO: Запилить детект IDS/IPS/WAF
 class Controller:
     def __init__(self, config):
         # Объявления
@@ -15,8 +13,11 @@ class Controller:
         self.marked_raw_request = RequestMarker(self.initial_request, self.config).get_marked_request()
 
         analyzer = CommonAnalyzer(self.marked_raw_request, self.config)
-        # analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.config)
         analyzer.analyze()
+
+        # analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.config)
+        # analyzer.analyze()
+
 
     def get_initial_request(self):
         """ Возвращает инициализирующий запрос

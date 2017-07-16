@@ -7,7 +7,6 @@ from queue import Queue
 from request_package.request_modifier import RequestModifier
 from request_package.request_object import RequestObject
 from request_package.requester import Requester
-from encoders.encoder import no_encode
 
 
 class Analyzer:
@@ -27,10 +26,10 @@ class Analyzer:
         self.response_queue = Queue()
         self.standard_response = self.get_standard_response()
 
-        self.print_format = '|{response_code: ^{}}|{content_length: ^{}}|{row_count: ^{}}|{word_count: ^{}}|{request_time: ^{}}|{test_info: ^{}}|'
-        self.print_format_size = [5, 10, 10, 10, 20, 65]
+        self.print_format = '|{id: ^{}}|{response_code: ^{}}|{content_length: ^{}}|{row_count: ^{}}|{word_count: ^{}}|{request_time: ^{}}|{test_info: ^{}}|'
+        self.print_format_size = [5, 5, 10, 10, 10, 20, 65]
 
-    def get_modified_requests(self, payloads, encode_func, flags=7):
+    def get_modified_requests(self, payloads, flags=7):
         """ Возвращает список измененных запросов
 
         Модифицирует части начального запроса согласно параметру flags. Для модификации строки запроса используется
@@ -41,9 +40,11 @@ class Analyzer:
         :param flags: Число, указывающее, какие части запроса модифицировать
         :return: Список объектов RequestObject
         """
-        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config, encode_func)
-        a = request_modifier.get_modified_requests(flags=flags)
-        return a
+        if not isinstance(payloads, list):
+            payloads = list(payloads)
+
+        request_modifier = RequestModifier(self.marked_raw_request, payloads, self.config)
+        return request_modifier.get_modified_requests(flags=flags)
 
     def get_payloads(self, payload_path):
         """ Возвращает список нагрузок из директории payloads
@@ -73,8 +74,11 @@ class Analyzer:
         :return: Объект ResponseObject
         """
         print('[!] Получение стандартного ответа')
-        requester = Requester([self.get_initial_request()], self.response_queue, self.config)
-        standard_response = requester.get_standard_response(self.init_request_obj)
+        # Предварительная отчистка запроса от маркеров
+        init_request = RequestObject(self.init_request_obj.raw_request.replace(self.config['Program']['injection_mark'], ''))
+
+        requester = Requester(response_queue=self.response_queue, config=self.config)
+        standard_response = requester.get_standard_response(init_request)
         self.time_delta = (standard_response.request_time, standard_response.request_time)
         return standard_response
 
@@ -110,7 +114,7 @@ class Analyzer:
         resp_queue = Queue()
 
         self._reflect_payload = ''.join([random.choice(string.digits) for i in range(8)])
-        requests = self.get_modified_requests([self._reflect_payload], no_encode)
+        requests = self.get_modified_requests([self._reflect_payload])
 
         requester = Requester(requests, resp_queue, self.config)
         requester.run()
@@ -177,31 +181,31 @@ class Analyzer:
             'content_length': 'Контент',
             'row_count': 'Строки',
             'word_count': 'Слова',
-            'request_time': 'Время запроса'
+            'request_time': 'Время запроса',
+            'id': '№'
         }
         info = '\u005f' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
         info += '\n' + self.print_format.format(*self.print_format_size, **kwargs)
 
         print(info)
 
-    def print_resp_info(self, response_obj):
+    def print_resp_info(self, response_obj, response_id=0):
         kwargs = {
             'test_info': response_obj.test_info,
             'response_code': response_obj.response_code,
             'content_length': response_obj.content_length,
             'row_count': response_obj.row_count,
             'word_count': response_obj.word_count,
-            'request_time': response_obj.request_time
+            'request_time': response_obj.request_time,
+            'id': response_id
         }
 
         info = self.print_format.format(*self.print_format_size, **kwargs)
-        # info = info.encode(encoding=encoding) if encoding else info
 
         print(info)
 
     def print_footer(self):
         info = '-' * (sum(self.print_format_size) + len(self.print_format_size) + 1)
-        # info = info.encode(encoding=encoding) if encoding else info
         print(info)
 
     def _get_valid_filename(self, filename):
