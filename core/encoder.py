@@ -58,12 +58,12 @@ def unicode_encode(payload):
 
 def decimal_html_encode(payload):
     payload = str_to_bytes(payload)
-    return ''.join(map(lambda x: '&#{:0>7}'.format(x), payload))
+    return url_encode(''.join(map(lambda x: '&#{:0>7}'.format(x), payload)))
 
 
 def hexadecimal_html_encode(payload):
     payload = str_to_bytes(payload)
-    return ''.join(map(lambda x: '&#x{:0>2}'.format(hex(x)[2:]), payload))
+    return url_encode(''.join(map(lambda x: '&#x{:0>2}'.format(hex(x)[2:]), payload)))
 
 
 def overlong_utf8_encode(payload):

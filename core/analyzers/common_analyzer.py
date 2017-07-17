@@ -13,14 +13,13 @@ from request_package.requester import Requester
 class CommonAnalyzer(Analyzer):
     def __init__(self, marked_raw_request, properties):
         Analyzer.__init__(self, marked_raw_request, properties)
-        self.properties['CommonAnalyzer']['standard_response'] = self.standard_response
+        self.properties['Program']['standard_response'] = self.standard_response
+        self.printer = Printer(properties, 'CommonAnalyzer')
 
-        self.detect_reflected_patterns()
-        self.clean_reflected_rows(self.standard_response)
+        # self.detect_reflected_patterns()
+        # self.clean_reflected_rows(self.standard_response)
 
     def analyze(self):
-        self._response_id = 0
-
         common_payloads = self.get_payloads(self.properties['Program']['payload_path'] + 'fuzzing/common.txt')
         response_dict = defaultdict(lambda: defaultdict(list))
 
@@ -28,20 +27,20 @@ class CommonAnalyzer(Analyzer):
         modified_request_groups = self.get_modified_request_groups(common_payloads, encode_list)
         modified_requests = reduce(add, zip(*modified_request_groups))
 
-        self.print_standard_resp_info()
+        # self.print_standard_resp_info()
 
         requester = Requester(modified_requests, self.response_queue, self.properties)
         requester.run()
 
-        self.print_head()
+        self.printer.print_head()
 
         while requester.is_running() or not self.response_queue.empty():
             response_obj = self.response_queue.get()
-            self.clean_reflected_rows(response_obj)
+            # self.clean_reflected_rows(response_obj)
             response_dict[response_obj.gid][response_obj.id].append(response_obj)
 
             if len(response_dict[response_obj.gid].keys()) == len(encode_list):
-                self.print_result_for_response_group(response_dict[response_obj.gid])
+                self.printer.print_result_for_response_group(response_dict[response_obj.gid])
 
     def get_modified_request_groups(self, payloads, encode_list, flags=7):
         modified_payload_groups = []
@@ -59,10 +58,10 @@ class CommonAnalyzer(Analyzer):
 
         return modified_request_groups
 
-    def print_result_for_response_group(self, response_group):
-        self.print_footer()
-        for key in sorted(response_group.keys()):
-            response_list = response_group[key][0]
-            self._response_id += 1
-            self.print_resp_info(response_list, response_id=self._response_id)
-        self.print_footer()
+    # def print_result_for_response_group(self, response_group):
+    #     self.print_footer()
+    #     for key in sorted(response_group.keys()):
+    #         response_list = response_group[key][0]
+    #         self._response_id += 1
+    #         self.print_resp_info(response_list, response_id=self._response_id)
+    #     self.print_footer()
