@@ -1,5 +1,6 @@
 import re
 
+
 class RequestObject:
     def __init__(self, request, testing_param='', payload='', test_info=''):
         self.gid = None

@@ -1,11 +1,13 @@
-POST / HTTP/1.1
-Host: schedule.kantiana.ru
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
+GET /bwapp/sqli_1.php?title=asd&action=search HTTP/1.1
+Host: 127.0.0.1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
 Accept-Encoding: gzip, deflate
-Referer: http://schedule.kantiana.ru/
-Connection: close
-Content-Type: application/x-www-form-urlencoded
+Referer: http://127.0.0.1/bwapp/sqli_1.php
+Cookie: security_level=0; PHPSESSID=vjagd9ear95p5mnp1nmsit18e1
+X-Compress: 1
+Proxy-Authorization: 94bea077d1ee934468331691f3ac8ae46679671364e05afb0de48a6ca4eff4d8
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
 
-ComboId=1&SelectedFack=34&SelectedFO=1&SelectedKurs=1&SelectedZal=587
