@@ -16,8 +16,8 @@ class CommonAnalyzer(Analyzer):
         self.properties['Program']['standard_response'] = self.standard_response
         self.printer = Printer(properties, 'CommonAnalyzer')
 
-        # self.detect_reflected_patterns()
-        # self.clean_reflected_rows(self.standard_response)
+        self.detect_reflected_patterns()
+        self.clean_reflected_rows(self.standard_response)
 
     def analyze(self):
         common_payloads = self.get_payloads(self.properties['Program']['payload_path'] + 'fuzzing/common.txt')

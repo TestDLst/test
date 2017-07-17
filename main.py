@@ -15,6 +15,8 @@ from core.controller import Controller
 # TODO: задержка ответа
 class Main:
     def __init__(self):
+        self.print_banner()
+
         self.parser = argparse.ArgumentParser()
         self.arguments = self.get_arguments()
         self.script_path = os.path.dirname(os.path.realpath(__file__))
@@ -104,6 +106,12 @@ class Main:
         self.parser.print_help()
         exit()
 
+    def print_banner(self):
+        try:
+            with open('banner.txt') as f:
+                print(f.read())
+        except:
+            pass
     # Потестить
     def merge_args_and_config(self):
         # Указываем путь до main.py
@@ -151,7 +159,6 @@ class Main:
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
-            # properties.read_file(open('properties.ini','rb',encoding='utf8'))
             config.read_file(codecs.open('properties.ini', 'r', encoding='utf8'))
         else:
             config.read_file(codecs.open(path, 'r', encoding='utf8'))
