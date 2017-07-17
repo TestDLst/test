@@ -1,5 +1,6 @@
 import re
 
+
 class Printer:
     def __init__(self, properties=None, section_name=None):
         self.properties = properties
