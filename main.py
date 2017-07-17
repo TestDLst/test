@@ -162,7 +162,7 @@ class Main:
             self.config.write(config_file)
 
     def _test(self):
-        self.arguments.url = 'http://127.0.0.1/bwapp/sqli_1.php?title=asd&action=search'
+        self.arguments.url = 'http://localhost/bwapp/sqli_1.php?title=asd&action=search'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 6
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'

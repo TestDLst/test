@@ -1,6 +1,9 @@
 from core.analyzers.analyzer import Analyzer
 from core.encoder import url_encode
 from request_package.requester import Requester
+from core.encoder import *
+from functools import reduce
+from operator import add
 
 
 class SqlAnalyzer(Analyzer):
@@ -18,9 +21,13 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
         self.blind_sql_and_payloads = self.get_payloads(self.properties['Program']['script_path'] + '/payloads/fuzzing/sql_blind_and.txt')
         self.blind_sql_or_payloads = self.get_payloads(self.properties['Program']['script_path'] + '/payloads/fuzzing/sql_blind_or.txt')
 
-        self.modified_requests = self.get_modified_requests(self.blind_sql_and_payloads, url_encode, flags=5)
+        encode_list = [url_encode, double_url_encode, overlong_utf8_encode]
+        self.blind_sql_and_payloads = reduce(add, [list(map(encode, self.blind_sql_and_payloads)) for encode in encode_list])
+        self.blind_sql_or_payloads = reduce(add, [list(map(encode, self.blind_sql_or_payloads)) for encode in encode_list])
+
+        self.modified_requests = self.get_modified_requests(self.blind_sql_and_payloads + self.blind_sql_or_payloads, flags=5)
         for index, request in enumerate(self.modified_requests):
-            request.index = index
+            request.id = index
 
     def analyze(self):
         print('[!] Запускаю Blind Boolean Based SqlAnalyzer')
@@ -32,12 +39,12 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
 
         while requester.is_running() or not self.response_queue.empty():
             response_obj = self.response_queue.get()
-            responses[response_obj.index] = response_obj
+            responses[response_obj.id] = response_obj
 
-            if response_obj.index % 2 == 0:
-                index = response_obj.index + 1
+            if response_obj.id % 2 == 0:
+                index = response_obj.id + 1
             else:
-                index = response_obj.index - 1
+                index = response_obj.id - 1
 
             if responses.get(index) is not None:
                 resp1 = response_obj
@@ -46,20 +53,6 @@ class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
                 self._check_diff(resp1, resp2)
 
         self.print_footer()
-
-        # responses.sort(key=lambda x: x.id)
-        #
-        # responses = list(zip(responses[::2], responses[1::2]))
-        #
-        # for resp1, resp2 in responses:
-        #     if resp1.id + 1 != resp2.id:
-        #         print("ERROR")
-        #
-        # print('[!] Сравниваю ответы')
-        # self.print_head()
-        # for resp1, resp2 in responses:
-        #     self._check_diff(resp1, resp2)
-        # self.print_footer()
 
     def _check_diff(self, resp1, resp2):
         if resp1.response_code != resp2.response_code or resp1.content_length != resp2.content_length \

@@ -1,5 +1,5 @@
-GET /bwapp/sqli_1.php?title=asd&action=search HTTP/1.1
-Host: 127.0.0.1
+GET /bwapp/sqli_1.php?title=a&action=search HTTP/1.1
+Host: localhost
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
