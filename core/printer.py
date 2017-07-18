@@ -28,6 +28,7 @@ class Printer:
         self.bottom_string = ''
 
         getattr(self, 'init_{}_printer'.format(self._translate_section_name(section_name)))()
+        self._build_format_string()
 
     def init_common_analyzer_printer(self):
         self.compared_properties = ['response_code', 'content_length', 'row_count', 'word_count', 'request_time']
@@ -36,7 +37,12 @@ class Printer:
         self.format_size = ['5', '10', '18', '16', '14', '25', '*']
         self.format_separator = '|'
 
-        self._build_format_string()
+    def init_blind_boolean_based_sql_analyzer_printer(self):
+        self.compared_properties = ['response_code', 'content_length', 'row_count', 'word_count']
+
+        self.header_names = ['#', 'Код', 'Контент', 'Строки', 'Слова', 'Нагрузка']
+        self.format_size = ['5', '10', '18', '16', '14', '*']
+        self.format_separator = '|'
 
     def _build_format_string(self):
         self.format_size = self._calculate_width(self.format_size)

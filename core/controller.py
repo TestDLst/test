@@ -13,11 +13,11 @@ class Controller:
         self.initial_request = self.get_initial_request()
         self.marked_raw_request = RequestMarker(self.initial_request, self.properties).get_marked_request()
 
-        analyzer = CommonAnalyzer(self.marked_raw_request, self.properties)
-        analyzer.analyze()
-
-        # analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.properties)
+        # analyzer = CommonAnalyzer(self.marked_raw_request, self.properties)
         # analyzer.analyze()
+
+        analyzer = BlindBooleanBasedSqlAnalyzer(self.marked_raw_request, self.properties)
+        analyzer.analyze()
 
     def get_initial_request(self):
         """ Возвращает инициализирующий запрос
