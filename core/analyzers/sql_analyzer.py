@@ -6,23 +6,14 @@ from functools import reduce
 from operator import add
 
 
-class SqlAnalyzer(Analyzer):
-    def __init__(self, marked_raw_request, properties):
-        Analyzer.__init__(self, marked_raw_request, properties)
+class BlindBooleanBasedSqlAnalyzer(Analyzer):
+    def __init__(self, properties):
+        Analyzer.__init__(self, properties)
 
-    def analyze(self):
-        pass
-
-
-class BlindBooleanBasedSqlAnalyzer(SqlAnalyzer):
-    def __init__(self, marked_raw_request, properties):
-        SqlAnalyzer.__init__(self, marked_raw_request, properties)
-
-        self.properties['Program']['standard_response'] = self.standard_response
         self.printer = Printer(properties, 'BlindBooleanBasedSqlAnalyzer')
 
-        self.blind_sql_and_payloads = self.get_payloads(self.properties['Program']['script_path'] + '/payloads/fuzzing/sql_blind_and.txt')
-        self.blind_sql_or_payloads = self.get_payloads(self.properties['Program']['script_path'] + '/payloads/fuzzing/sql_blind_or.txt')
+        self.blind_sql_and_payloads = self.get_payloads('/fuzzing/sql_blind_and.txt')
+        self.blind_sql_or_payloads = self.get_payloads('/fuzzing/sql_blind_or.txt')
 
         encode_list = [url_encode, double_url_encode, overlong_utf8_encode]
         self.blind_sql_and_payloads = reduce(add, [list(map(encode, self.blind_sql_and_payloads)) for encode in encode_list])

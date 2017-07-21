@@ -19,7 +19,7 @@ class Printer:
         self.compared_properties = []
 
         self.format_string = ''
-        self.format_separator = ''
+        self.format_separator = '|'
         self.format_size = []
 
         self.header_string = ''
@@ -34,15 +34,13 @@ class Printer:
         self.compared_properties = ['response_code', 'content_length', 'row_count', 'word_count', 'request_time']
 
         self.header_names = ['#', 'Код', 'Контент', 'Строки', 'Слова', 'Время', 'Нагрузка']
-        self.format_size = ['5', '10', '18', '16', '14', '25', '*']
-        self.format_separator = '|'
+        self.format_size = ['5', '10', '18', '16', '14', '25', '*'] # * - поделить оставшееся пространство self.terminal_width
 
     def init_blind_boolean_based_sql_analyzer_printer(self):
         self.compared_properties = ['response_code', 'content_length', 'row_count', 'word_count']
 
         self.header_names = ['#', 'Код', 'Контент', 'Строки', 'Слова', 'Нагрузка']
         self.format_size = ['5', '10', '18', '16', '14', '*']
-        self.format_separator = '|'
 
     def _build_format_string(self):
         self.format_size = self._calculate_width(self.format_size)
@@ -85,7 +83,6 @@ class Printer:
         for ind, change in enumerate(changes):
             old_result = '{:+}'.format(change[1])
             if change[2] == '=':
-                # temp_body_size[ind + 1] -= 9
                 colored_old_result = old_result
             elif change[2] == '>':
                 temp_body_size[ind + 1] += 9

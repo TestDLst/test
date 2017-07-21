@@ -52,6 +52,7 @@ def double_url_encode(payload):
     return quote(quote(payload))
 
 
+# TODO: доработать
 def unicode_encode(payload):
     payload = str_to_bytes(payload)
 

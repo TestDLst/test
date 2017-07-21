@@ -4,7 +4,7 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
 Accept-Encoding: gzip, deflate
-Referer: http://localhost/bwapp/sqli_1.php
-Cookie: security_level=0; PHPSESSID=ohu0o4mo8j29blvpkkcpeqjf87
+Referer: http://127.0.0.1/bwapp/sqli_1.php
+Cookie: PHPSESSID=14qcfevq9nf8otr1gd7a9cqpq7; security_level=0
 Connection: close
 

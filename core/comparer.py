@@ -3,6 +3,13 @@ class Comparer:
         self.results = []
 
     def compare_properties(self, old_response, new_response, compared_properties):
+        """ Сравнивает свойства compared_properties между объектами old_response и new_response
+
+        :param old_response: объект ResponseObject, символизирующий "было"
+        :param new_response: объект ResponseObject, символизирующий "стало"
+        :param compared_properties: list названий свойств, сравнение которых нужно провести
+        :return: list, содержащий кортеж (new_param, old_param, sigh), где sign - элемент из ['=', '>', '<'], показывающий, в какую сторону произошли изменения
+        """
         self.results = []
         for prop in compared_properties:
             getattr(self, '_compare_'+prop)(old_response, new_response)

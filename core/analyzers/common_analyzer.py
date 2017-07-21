@@ -9,18 +9,16 @@ from core.printer import Printer
 from request_package.requester import Requester
 
 
-# TODO: Отправлять по 2 раза, выводить [len1/len2] по каждой метрике
 class CommonAnalyzer(Analyzer):
-    def __init__(self, marked_raw_request, properties):
-        Analyzer.__init__(self, marked_raw_request, properties)
-        self.properties['Program']['standard_response'] = self.standard_response
+    def __init__(self, properties):
+        Analyzer.__init__(self, properties)
         self.printer = Printer(properties, 'CommonAnalyzer')
 
         self.detect_reflected_patterns()
         self.clean_reflected_rows(self.standard_response)
 
     def analyze(self):
-        common_payloads = self.get_payloads(self.properties['Program']['payload_path'] + 'fuzzing/common.txt')
+        common_payloads = self.get_payloads('fuzzing/common.txt')
         response_dict = defaultdict(lambda: defaultdict(list))
 
         encode_list = [url_encode, double_url_encode, overlong_utf8_encode]
@@ -42,26 +40,4 @@ class CommonAnalyzer(Analyzer):
             if len(response_dict[response_obj.gid].keys()) == len(encode_list):
                 self.printer.print_result_for_response_group(response_dict[response_obj.gid])
 
-    def get_modified_request_groups(self, payloads, encode_list, flags=7):
-        modified_payload_groups = []
-        for encode_func in encode_list:
-            modified_payload_groups.append(map(encode_func, payloads))
 
-        modified_request_groups = []
-        for payload_group in modified_payload_groups:
-            modified_request_groups.append(self.get_modified_requests(payload_group, flags=flags))
-
-        for gid, request_group in enumerate(zip(*modified_request_groups)):
-            for id, request in enumerate(request_group):
-                request.gid = gid
-                request.id = id
-
-        return modified_request_groups
-
-    # def print_result_for_response_group(self, response_group):
-    #     self.print_footer()
-    #     for key in sorted(response_group.keys()):
-    #         response_list = response_group[key][0]
-    #         self._response_id += 1
-    #         self.print_resp_info(response_list, response_id=self._response_id)
-    #     self.print_footer()
