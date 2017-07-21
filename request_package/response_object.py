@@ -54,6 +54,4 @@ class ResponseObject:
             if header_content_type is not None:
                 content_type = header_content_type.group(1)
 
-
-
         return content_type
