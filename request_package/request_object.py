@@ -52,17 +52,7 @@ class RequestObject:
 
         self.headers_list = self.headers[:]
         self.headers = dict([i.split(': ') for i in self.headers])
-
-
-        if self.headers['Host'].strip() == '127.0.0.1':
-            self.headers['Host'] = 'localhost'
-
-
-
-
         self.host = self.headers['Host']
-
-
 
         self._identify_content_type()
 
