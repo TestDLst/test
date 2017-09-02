@@ -1,11 +1,9 @@
-GET /bwapp/sqli_1.php?title=a&action=search HTTP/1.1
-Host: 127.0.0.1
+GET /statistic/changelog?page=15 HTTP/1.1
+Host: sirus.su
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
-Accept-Encoding: gzip, deflate
-Referer: http://127.0.0.1/bwapp/sqli_1.php
-Cookie: PHPSESSID=14qcfevq9nf8otr1gd7a9cqpq7; security_level=0
+Accept-Encoding: gzip, deflate, br
+Cookie: XSRF-TOKEN=eyJpdiI6Ikp1QlJheldRSFpcL1RcL0Q0b1pOYWxSUT09IiwidmFsdWUiOiIrdVMxSGdvNDNEMEhYcE9SMTNBQzduRTF2WDVhT0ZZdVZDNXZaUGYwREZuTVwvamdyMzdSNjdmN3ZvdE9rQWhkM1ZjM3lFeHpcL1ZWeWhUT010R0JcL096QT09IiwibWFjIjoiNTM5NDVjZmRlMGNmNDVjNzIzMTUxNWY0M2VhYzYyYWQxMjVlZDQ1OTExNzYzMjVhN2UxNDlkNDM2MjdlOTE1NSJ9; sirus_session=53can6Spn3eZwUksffNAX6PNU7mGujQEoq6xDlkQ; _from=https%3A%2F%2Fsirus.su%2F; remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d=738170%7CNHMUatNqEd3DwdfI97sGZiWMawziGFlCXb4sXJNk1vvo7; _ym_uid=1501621927455094366; _ym_isad=2
 Connection: close
-Content-Length: 3
 

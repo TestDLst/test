@@ -129,9 +129,8 @@ class Requester:
             raw_response = resp.read()
             headers = dict(resp.getheaders())
 
-            encoding = ResponseObject.determine_charset(raw_response, headers)
+            raw_response = self._decode_response(raw_response, headers)
 
-            raw_response = raw_response.decode(encoding=encoding)
             response_code = resp.getcode()
 
         except Exception as e:
@@ -152,6 +151,24 @@ class Requester:
 
         response_obj = ResponseObject(**kwargs)
         self.add_response(response_obj)
+
+    def _decode_response(self, raw_response, headers):
+        encodings = ResponseObject.determine_charsets(raw_response, headers)
+        error_msg = None
+
+        for encoding in encodings:
+            try:
+                raw_response = raw_response.decode(encoding=encoding)
+                error_msg = None
+                break
+            except Exception as e:
+                error_msg = e
+
+        if error_msg:
+            print(error_msg)
+            return ''
+
+        return raw_response
 
     def get_standard_response(self, request):
         self._send_request(request)

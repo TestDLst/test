@@ -19,7 +19,7 @@ class RequestMarker:
 
         self.excluded_headers = {'Host', 'Accept', 'Accept-Language', 'Accept-Encoding', 'Connection', 'Content-Type',
                                  'Content-Length', 'Upgrade-Insecure-Requests', 'X-Originating-IP', 'X-Remote-IP',
-                                 'X-Remote-Addr', 'X-Client-IP'} # Если можно будет указывать, какие параметры пропускать
+                                 'X-Remote-Addr', 'X-Client-IP', 'X-Forwarded-Host', 'X-Remote-IP'} # Если можно будет указывать, какие параметры пропускать
         self.all_headers = set()  # Все имена распарсенных хидеров будут здесь
         # Хидеры, которые будут добавлены в запрос, если их в нем нет
         self.extra_headers = {

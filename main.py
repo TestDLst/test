@@ -3,8 +3,8 @@ import codecs
 import configparser
 import os
 import sys
-from urllib.parse import urlparse
 from collections import defaultdict
+from urllib.parse import urlparse
 
 from core.controller import Controller
 
@@ -14,17 +14,19 @@ from core.controller import Controller
 # TODO: --max-rate пакетов
 # TODO: задержка ответа
 class Main:
-    def __init__(self):
+    URL_NOT_FOUND_CODE = 1
+    REQUEST_PATH_NOT_FOUND_CODE = 2
+    WORDLIST_PATH_CMD_NOT_FOUND_CODE = 3
+    WORDLIST_PATH_CFG_NOT_FOUND_CODE = 4
+    WORDLIST_PATH_ALL_NOT_FOUND_CODE = 5
+    CONFIG_FILE_NOT_FOUND = 6
+
+    def run(self):
         self.print_banner()
 
-        self.parser = argparse.ArgumentParser()
         self.arguments = self.get_arguments()
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
-        # Содержит все важные параметры программы
-        self.properties = defaultdict(lambda: defaultdict(None))
-
         self.check_config_exist()
-        self.config_path = self.arguments.config_file if self.arguments.config_file else 'config.ini'
+        self.config_path = self.arguments.config_file if self.arguments.config_file else self.config_path
         self.config = self.read_config(self.config_path)
 
         # Указываем параметры без консоли
@@ -41,10 +43,24 @@ class Main:
             for option in self.config[section]:
                 self.properties[section][option] = self.config.get(section, option)
 
-        # Для импорта по пути относительно main.py
-        sys.path.append(self.script_path)
-
         self.controller = Controller(self.properties)
+
+    def __init__(self):
+        # Для импорта по пути относительно main.py
+
+        self.parser = argparse.ArgumentParser()
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
+        sys.path.append(self.script_path)
+        self.config_path = 'config.ini'
+
+        # Объект, содержащий аргументы командной строки
+        self.arguments = None
+        # Объект класса ConfigParser, содержит предварительные настройки программы
+        self.config = None
+        # Словарь, содержащий все важные параметры программы
+        self.properties = defaultdict(lambda: defaultdict(None))
+        # Объект класса Controller, содержащий логику программы
+        self.controller = None
 
     # Потестить
     def get_arguments(self):
@@ -71,40 +87,36 @@ class Main:
 
         # Указан ли url
         if not _args.url and not _cfg['Main']['url']:
-            self._print_error_message('Не найден url адрес цели')
+            self._print_error_message('Не найден url адрес цели', self.URL_NOT_FOUND_CODE)
 
         # Указан ли путь до запроса
         if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['Main']['file']:
-            self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле')
+            self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле',
+                                      self.REQUEST_PATH_NOT_FOUND_CODE)
 
         # Если словарь задан через параметр
         if _args.wordlist:
-            if not os.path.isfile(_args.wordlist) and not os.path.isfile('payloads/'+_args.wordlist):
-                self._print_error_message('Укажите коррекнтый путь до словаря через -w')
+            if not os.path.isfile(_args.wordlist) and not os.path.isfile('payloads/' + _args.wordlist):
+                self._print_error_message('Укажите коррекнтый путь до словаря через -w',
+                                          self.WORDLIST_PATH_CMD_NOT_FOUND_CODE)
         # Если есть запись в конфиге (должен хранится полный путь)
         elif _cfg['Main']['wordlist']:
             if not os.path.isfile(_cfg['Main']['wordlist']):
-                self._print_error_message('Укажите коррекнтый путь до словаря через -w')
+                self._print_error_message('Укажите коррекнтый путь до словаря через -w',
+                                          self.WORDLIST_PATH_CFG_NOT_FOUND_CODE)
         # Если нет упоминаний о словаре
         else:
-            self._print_error_message('Укажите коррекнтый путь до словаря через -w')
+            self._print_error_message('Укажите коррекнтый путь до словаря через -w',
+                                      self.WORDLIST_PATH_ALL_NOT_FOUND_CODE)
 
         del _args, _cfg
 
-    def check_config_exist(self):
-        _args = self.arguments
+        return 0
 
-        if _args.config_file and not os.path.isfile(_args.file):
-            self._print_error_message('Указанного конфигурационного файла по пути --config-file не существует')
-        if not os.path.isfile('config.ini'):
-            self._print_error_message('Не удалось найти конфигурационный файл config.ini')
-
-        del _args
-
-    def _print_error_message(self, message):
+    def _print_error_message(self, message, code):
         print('[!] {message}'.format(message=message))
         self.parser.print_help()
-        exit()
+        return code
 
     def print_banner(self):
         try:
@@ -112,6 +124,7 @@ class Main:
                 print(f.read())
         except:
             pass
+
     # Потестить
     def merge_args_and_config(self):
         # Указываем путь до main.py
@@ -126,7 +139,7 @@ class Main:
             url_port = url.port if url.port else ('80' if url_scheme == 'http' else '443')
 
             self.config['RequestInfo']['scheme'] = url_scheme
-            self.config['RequestInfo']['port'] = url_port
+            self.config['RequestInfo']['port'] = str(url_port)
 
         if self.arguments.file:
             self.config['Main']['file'] = self.arguments.file
@@ -159,7 +172,7 @@ class Main:
         config = configparser.ConfigParser()
         # Добавить Try\Catch на корявый конфиг
         if not path:
-            config.read_file(codecs.open('properties.ini', 'r', encoding='utf8'))
+            config.read_file(codecs.open(self.script_path + '/config.ini', 'r', encoding='utf8'))
         else:
             config.read_file(codecs.open(path, 'r', encoding='utf8'))
         return config
@@ -168,14 +181,57 @@ class Main:
         with codecs.open(self.config_path, 'w', encoding='utf8') as config_file:
             self.config.write(config_file)
 
+    def create_config(self):
+        config = configparser.ConfigParser()
+        config.add_section('Main')
+        config.set('Main', 'url')
+        config.set('Main', 'threads')
+        config.set('Main', 'file')
+        config.set('Main', 'wordlist')
+
+        config.add_section('RequestInfo')
+        config.set('RequestInfo', 'scheme')
+        config.set('RequestInfo', 'port')
+
+        config.add_section('Program')
+        config.set('Program', 'script_path')
+        config.set('Program', 'payload_path')
+        config.set('Program', 'injection_mark')
+
+        config.add_section('Proxy')
+        config.set('Proxy', 'scheme')
+        config.set('Proxy', 'host')
+        config.set('Proxy', 'port')
+
+        with open('config.ini', 'w') as config_file:
+            config.write(config_file)
+
+    def check_config_exist(self):
+        _args = self.arguments
+
+        if _args.config_file and not os.path.isfile(_args.file):
+            self._print_error_message('[-] Указанного конфигурационного файла по пути --config-file не существует',
+                                      self.CONFIG_FILE_NOT_FOUND)
+        if not os.path.isfile('config.ini'):
+            print('[!] Не удалось найти конфигурационный файл config.ini, создать новый?')
+            answer = input('[!] Не удалось найти конфигурационный файл config.ini, создать новый? [Y/n]: ')
+            if not answer or answer.lower() == 'y':
+                self.create_config()
+            else:
+                self._print_error_message('[-] Невозможно запустить скрипт без конфигурационного файла',
+                                          self.CONFIG_FILE_NOT_FOUND)
+
+        del _args
+
     def _test(self):
-        self.arguments.url = 'http://localhost/bwapp/sqli_1.php?title=asd&action=search'
+        self.arguments.url = 'https://sirus.su/base/character/'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 6
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
-        self.arguments.proxy = 'http://127.0.0.1:8080'
+        # self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 
 if __name__ == '__main__':
     main = Main()
+    main.run()

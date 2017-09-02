@@ -109,7 +109,7 @@ class Analyzer:
         self.time_delta = (standard_response.request_time, standard_response.request_time)
         return standard_response
 
-    def is_interesting_behavior(self, response_obj, flags=7):
+    def is_interesting_behavior(self, response_obj, flags=15):
         """ Сравнивает ответ со стандартным ответом
 
         :param response_obj:
@@ -121,7 +121,7 @@ class Analyzer:
             return True
         if flags & self.ROW_COUNT and response_obj.row_count != self.standard_response.row_count:
             return True
-        if flags & self.REQUEST_TIME and not self.time_delta[0] <= response_obj.request_time <= self.time_delta[1]:
+        if flags & self.REQUEST_TIME and not abs(self.standard_response.request_time - response_obj.request_time) < 5:
             return True
         if flags & self.WORD_COUNT and response_obj.word_count != self.standard_response.word_count:
             return True

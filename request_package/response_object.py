@@ -30,14 +30,14 @@ class ResponseObject:
         self.word_count = len(re.findall('[\S]+', self.raw_response))
 
     @staticmethod
-    def determine_charset(raw_response, response_headers):
+    def determine_charsets(raw_response, response_headers):
         """ Пытается определить кодировку по хидерам, ответу и кофейной гуще
 
         :param raw_response: Сырой ответ в байтах или строкой
         :param response_headers:
         :return:
         """
-        content_type = 'utf-8'
+        content_types = ['utf-8']
 
         soup = BeautifulSoup(raw_response, 'html.parser')
         meta = soup.find('meta', attrs={'http-equiv': 'Content-Type'})
@@ -46,6 +46,8 @@ class ResponseObject:
             meta_content_type = re.search('charset=([\w-]+)', meta['content'])
             if meta_content_type is not None:
                 content_type = meta_content_type.group(1)
+                if content_type.lower() not in content_types:
+                    content_types.append(content_type.lower())
 
         header = response_headers.get('Content-Type')
 
@@ -53,5 +55,7 @@ class ResponseObject:
             header_content_type = re.search('charset=([\w-]+)', response_headers['Content-Type'])
             if header_content_type is not None:
                 content_type = header_content_type.group(1)
+                if content_type not in content_types:
+                    content_types.append(content_type.lower())
 
-        return content_type
+        return content_types
