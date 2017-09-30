@@ -45,12 +45,20 @@ class RequestModifier:
         return self.modified_requests
 
     def _modify_query_string(self):
-        pattern = '([^?&]+)=({mark}{mark}|{mark}.+?{mark})'.format(mark=self.injection_mark)
+        pattern = '([^?&]+)=({mark}{mark}|{mark}.+?{mark})|({mark}(.+?){mark})'.format(mark=self.injection_mark)
         re.sub(pattern, self._feed_query_string, self.marked_request.query_string)
 
     def _feed_query_string(self, match):
-        start, end = match.regs[2]
-        param_name = match.string[match.regs[1][0]:match.regs[1][1]]
+        # Если строка запроса формата /path/to/file?param1=value1
+        is_rest = False
+        if match.regs[2] != (-1,-1):
+            start, end = match.regs[2]
+            param_name = match.string[match.regs[1][0]:match.regs[1][1]]
+        # иначе REST
+        else:
+            is_rest = True
+            start, end = match.regs[4]
+            param_name = 'Query string'
 
         for payload in self.payloads:
             modified_value = (match.string[start:end] + payload).replace(self.injection_mark, '')
@@ -61,7 +69,7 @@ class RequestModifier:
 
             kwargs = {
                 'testing_param': param_name,
-                'test_info': param_name + '=' + (match.string[start:end] + payload).replace(self.injection_mark, ''),
+                'test_info': param_name + '=' + modified_value if not is_rest else param_name + ': ' + modified_value,
                 'payload': payload
             }
 

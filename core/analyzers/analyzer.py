@@ -174,7 +174,8 @@ class Analyzer:
                 raw_response = re.sub(reflect_pattern, self._cut_non_whitespace, raw_response)
                 response_obj.rebuild(raw_response)
             except Exception as e:
-                print(reflect_pattern + '\n' + e)
+                # print(reflect_pattern + '\n' + str(e))
+                pass
         return response_obj
 
     def dump_response(self, filename, response_obj, encoding='utf8'):

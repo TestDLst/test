@@ -26,6 +26,7 @@ class CommonAnalyzer(Analyzer):
         modified_request_groups = self.get_modified_request_groups(common_payloads, encode_list)
         modified_requests = reduce(add, zip(*modified_request_groups))
 
+
         # self.print_standard_resp_info()
 
         requester = Requester(modified_requests, self.response_queue, self.properties)

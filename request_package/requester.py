@@ -92,7 +92,6 @@ class Requester:
         """ Add a response to the response_queue """
         self.response_queue.put(response)
 
-    # TODO разобраться с нахождением кодировки в коде страницы или заголовках
     def _send_request(self, request):
         scheme = self.properties['RequestInfo']['scheme'].lower()
         port = int(self.properties['RequestInfo']['port'])

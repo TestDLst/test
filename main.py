@@ -8,8 +8,7 @@ from urllib.parse import urlparse
 
 from core.controller import Controller
 
-
-# TODO: Создавать конфиг файл. В случае его отсутствия предлагать создать новый
+# TODO: Чекать целостность конфига
 # TODO: Добавить --exclude/--include параметры
 # TODO: --max-rate пакетов
 # TODO: задержка ответа
@@ -88,33 +87,37 @@ class Main:
         # Указан ли url
         if not _args.url and not _cfg['Main']['url']:
             self._print_error_message('Не найден url адрес цели', self.URL_NOT_FOUND_CODE)
+            exit()
 
         # Указан ли путь до запроса
         if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['Main']['file']:
             self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле',
                                       self.REQUEST_PATH_NOT_FOUND_CODE)
-
+            exit()
         # Если словарь задан через параметр
         if _args.wordlist:
             if not os.path.isfile(_args.wordlist) and not os.path.isfile('payloads/' + _args.wordlist):
                 self._print_error_message('Укажите коррекнтый путь до словаря через -w',
                                           self.WORDLIST_PATH_CMD_NOT_FOUND_CODE)
+                exit()
         # Если есть запись в конфиге (должен хранится полный путь)
         elif _cfg['Main']['wordlist']:
             if not os.path.isfile(_cfg['Main']['wordlist']):
                 self._print_error_message('Укажите коррекнтый путь до словаря через -w',
                                           self.WORDLIST_PATH_CFG_NOT_FOUND_CODE)
+                exit()
         # Если нет упоминаний о словаре
         else:
             self._print_error_message('Укажите коррекнтый путь до словаря через -w',
                                       self.WORDLIST_PATH_ALL_NOT_FOUND_CODE)
+            exit()
 
         del _args, _cfg
 
         return 0
 
     def _print_error_message(self, message, code):
-        print('[!] {message}'.format(message=message))
+        print('[-] {message}'.format(message=message))
         self.parser.print_help()
         return code
 
@@ -184,24 +187,24 @@ class Main:
     def create_config(self):
         config = configparser.ConfigParser()
         config.add_section('Main')
-        config.set('Main', 'url')
-        config.set('Main', 'threads')
-        config.set('Main', 'file')
-        config.set('Main', 'wordlist')
+        config.set('Main', 'url', '')
+        config.set('Main', 'threads', '')
+        config.set('Main', 'file', '')
+        config.set('Main', 'wordlist', '')
 
         config.add_section('RequestInfo')
-        config.set('RequestInfo', 'scheme')
-        config.set('RequestInfo', 'port')
+        config.set('RequestInfo', 'scheme', '')
+        config.set('RequestInfo', 'port', '')
 
         config.add_section('Program')
-        config.set('Program', 'script_path')
-        config.set('Program', 'payload_path')
-        config.set('Program', 'injection_mark')
+        config.set('Program', 'script_path', '')
+        config.set('Program', 'payload_path', '')
+        config.set('Program', 'injection_mark', 'FUZZ')
 
         config.add_section('Proxy')
-        config.set('Proxy', 'scheme')
-        config.set('Proxy', 'host')
-        config.set('Proxy', 'port')
+        config.set('Proxy', 'scheme', '')
+        config.set('Proxy', 'host', '')
+        config.set('Proxy', 'port', '')
 
         with open('config.ini', 'w') as config_file:
             config.write(config_file)
@@ -212,23 +215,24 @@ class Main:
         if _args.config_file and not os.path.isfile(_args.file):
             self._print_error_message('[-] Указанного конфигурационного файла по пути --config-file не существует',
                                       self.CONFIG_FILE_NOT_FOUND)
+            exit()
         if not os.path.isfile('config.ini'):
-            print('[!] Не удалось найти конфигурационный файл config.ini, создать новый?')
             answer = input('[!] Не удалось найти конфигурационный файл config.ini, создать новый? [Y/n]: ')
             if not answer or answer.lower() == 'y':
                 self.create_config()
             else:
-                self._print_error_message('[-] Невозможно запустить скрипт без конфигурационного файла',
+                self._print_error_message('Невозможно запустить скрипт без конфигурационного файла',
                                           self.CONFIG_FILE_NOT_FOUND)
+                exit()
 
         del _args
 
     def _test(self):
-        self.arguments.url = 'https://sirus.su/base/character/'
+        self.arguments.url = 'https://b2b-delivery.ru/my/'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 6
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
-        # self.arguments.proxy = 'http://127.0.0.1:8080'
+        self.arguments.proxy = 'http://127.0.0.1:8080'
         self.arguments.update_config = True
 
 

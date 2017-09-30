@@ -56,8 +56,12 @@ class RequestMarker:
         """Помечает значения в строке запроса"""
         method, uri, http_ver = self.request_object.query_string.split(' ')
 
-        uri = self._mark_by_regexp(uri, '=([^&]+)')
-        uri = self._mark_empty_params(uri)
+        if '?' in uri:
+            uri = self._mark_by_regexp(uri, '=([^&]+)')
+            uri = self._mark_empty_params(uri)
+        # REST style
+        else:
+            uri = self._mark_by_regexp(uri, '(?<=/)(.+?)(?=/)')
 
         self.request_object.query_string = ' '.join([method, uri, http_ver])
 
