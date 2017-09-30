@@ -68,9 +68,9 @@ class Main:
         main_group.add_argument('-f', '--file', dest='file', help='Файл с запросом')
         main_group.add_argument('-w', '--wordlist', dest='wordlist', default='fuzzing/metacharacters.txt',
                                 help='Путь до словаря (абсолютный, относительный, от директории payloads)')
-        main_group.add_argument('-t', '--threads', dest='threads', type=int, help='Количество потоков')
+        main_group.add_argument('-t', '--threads', dest='threads', type=int, default=5, help='Количество потоков')
         main_group.add_argument('--proxy', dest='proxy',
-                                help='Адрес прокси-сервера (http://127.0.0.1:8080, socks5://127.0.0.1:9050, ...)')
+                                help='Адрес прокси-сервера (http://127.0.0.1:8080, socks5://127.0.0.1:9050, ...), none в случае сброса настройки в конфиге')
 
         config_group = self.parser.add_argument_group('Config')
         config_group.add_argument('--update', dest='update_config', action='store_true',
@@ -91,9 +91,11 @@ class Main:
 
         # Указан ли путь до запроса
         if _args.file and not os.path.isfile(_args.file) or not _args.file and not _cfg['Main']['file']:
+
             self._print_error_message('Укажите коррекнтый путь до запроса через --file или в конфигурационном файле',
                                       self.REQUEST_PATH_NOT_FOUND_CODE)
             exit()
+
         # Если словарь задан через параметр
         if _args.wordlist:
             if not os.path.isfile(_args.wordlist) and not os.path.isfile('payloads/' + _args.wordlist):
@@ -160,15 +162,20 @@ class Main:
 
         # Парсим --proxy
         if self.arguments.proxy:
-            proxy = urlparse(self.arguments.proxy)
-            proxy_scheme = proxy.scheme
-            proxy_host = proxy.hostname
-            proxy_port = str(proxy.port)
+            if self.arguments.proxy.lower() == 'none':
+                self.config['Proxy']['scheme'] = ''
+                self.config['Proxy']['host'] = ''
+                self.config['Proxy']['port'] = ''
+            else:
+                proxy = urlparse(self.arguments.proxy)
+                proxy_scheme = proxy.scheme
+                proxy_host = proxy.hostname
+                proxy_port = str(proxy.port)
 
-            # Распихиваем --proxy
-            self.config['Proxy']['scheme'] = proxy_scheme
-            self.config['Proxy']['host'] = proxy_host
-            self.config['Proxy']['port'] = proxy_port
+                # Распихиваем --proxy
+                self.config['Proxy']['scheme'] = proxy_scheme
+                self.config['Proxy']['host'] = proxy_host
+                self.config['Proxy']['port'] = proxy_port
 
     # Потестить нестандартный путь
     def read_config(self, path=None):
@@ -228,7 +235,7 @@ class Main:
         del _args
 
     def _test(self):
-        self.arguments.url = 'https://b2b-delivery.ru/my/'
+        self.arguments.url = 'http://webinar.rgups.ru:8000'
         self.arguments.file = 'request.txt'
         self.arguments.threads = 6
         self.arguments.wordlist = 'fuzzing/metacharacters.txt'
